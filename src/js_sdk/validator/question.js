@@ -35,7 +35,7 @@ export default {
         "errorMessage": "{label}必填"
       },
       {
-        "format": "string"
+        "format": "number"
       }
     ],
     "label": "问题分数"

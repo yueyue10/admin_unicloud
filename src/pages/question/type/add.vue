@@ -1,12 +1,18 @@
 <template>
   <view class="uni-container">
     <view class="uni-group">
-      <view class="uni-title">新增试题</view>
+      <view class="uni-title" style="font-weight: bolder">新增试题</view>
+      <view style="color: #dd524d">总分:{{getTotalScore}}</view>
     </view>
     <view class="uni-container">
       <!--所有题目-->
       <view v-for="(item,index) in questionList">
-        <view style="font-weight: bolder;margin-top: 20px">{{index + 1}}、{{item.title}}</view>
+        <view style="font-weight: bolder;margin-top: 20px">
+          {{index + 1}}、{{item.title}}
+          <text v-if="item.answer&&item.answer.length>0">【选择题】</text>
+          <text v-else>【判断题】</text>
+          <uni-icons class="uni-icons-trash" @click="deleteQuestion(item._id)"></uni-icons>
+        </view>
         <view style="margin-top: 10px" class="hor-layout-center">
           <view v-for="(opt,idx) in item.options" style="margin: 0px 10px">
             <text style="color: #99a9bf">{{opt.text}}.</text>
@@ -18,6 +24,8 @@
           <text v-for="(ans,idx) in item.answer">
             {{ans}}
           </text>
+          <text v-if="item.decide">正确</text>
+          <text v-if="!item.decide">错误</text>
         </view>
         <view style="margin-top: 5px;color: #dd524d">分数：{{item.score}}</view>
       </view>
@@ -54,7 +62,7 @@
             </uni-forms-item>
             <uni-forms-item name="score" label="问题分数">
               <input placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border"
-                     :value="questionChoose.score"/>
+                     :value="questionChoose.score" type="number"/>
             </uni-forms-item>
             <view class="uni-button-group">
               <button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form1')">提交</button>
@@ -64,19 +72,27 @@
         </block>
         <!--=========================判断题==========================-->
         <block v-if="questionType==2">
-          <uni-forms class="uni-forms question-content" ref="form1" v-model="questionDecide" :rules="rules"
-                     validateTrigger="bind"
-                     @submit="submit">
-            <uni-forms-item name="question_index">
-              <view>第{{}}题</view>
+          <uni-forms class="uni-forms question-content" ref="form2" v-model="questionDecide" :rules="rules"
+                     validateTrigger="bind" @submit="submit">
+            <uni-forms-item name="index">
+              <view style="font-weight: bold">第{{questionList.length + 1}}题</view>
             </uni-forms-item>
-            <uni-forms-item name="question_title" label="问题题目">
-              <input placeholder="请输入问题题目" @input="binddata('username', $event.detail.value)" class="uni-input-border"
-                     :value="formData.username"/>
+            <uni-forms-item name="title" label="问题题目">
+              <input placeholder="请输入问题题目" @input="binddata('title', $event.detail.value)" class="uni-input-border"
+                     :value="questionDecide.title"/>
             </uni-forms-item>
-            <uni-forms-item name="question_answer" label="问题答案">
-
+            <uni-forms-item name="decide" label="问题答案">
+              <uni-data-checklist :range="questionDecs" :value="getDecideAns"
+                                  @change="changeDecideAns"></uni-data-checklist>
             </uni-forms-item>
+            <uni-forms-item name="score" label="问题分数">
+              <input placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border"
+                     :value="questionDecide.score" type="number"/>
+            </uni-forms-item>
+            <view class="uni-button-group">
+              <button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form2')">提交</button>
+              <button style="width: 100px;" type="warn" class="uni-button" @click="questionType=0">返回</button>
+            </view>
           </uni-forms>
         </block>
       </view>
@@ -86,6 +102,7 @@
 
 <script>
 import validator from '@/js_sdk/validator/question.js';
+import UniIcons from "@/components/uni-icons/uni-icons";
 
 const db = uniCloud.database();
 const dbCmd = db.command;
@@ -102,8 +119,11 @@ function getValidator(fields) {
 }
 
 export default {
+  components: {UniIcons},
   data() {
     return {
+      questionDecs: [{"text": "正确", "value": '正确', "decide": true},
+        {"text": "错误", "value": '错误', "decide": false}],
       questionOpts: [{"text": "A", "value": 'A'},
         {"text": "B", "value": "B"},
         {"text": "C", "value": "C"},
@@ -118,18 +138,13 @@ export default {
           {"text": "C", "content": ""},
           {"text": "D", "content": ""}],
         "answer": [],
-        "score": "5"
+        "score": 1
       },
       questionDecide: {
-        "username": "",
-      },
-      formData: {
-        "username": "1",
-        "password": "",
-        "role": [],
-        "mobile": "",
-        "email": "",
-        "status": true //默认启用
+        "index": 0,
+        "title": "",
+        "decide": true,
+        "score": 1
       },
       rules: {
         ...getValidator(["title", "options", "answer", "score"])
@@ -137,13 +152,57 @@ export default {
       roles: []
     }
   },
-  computed: {},
+  computed: {
+    getDecideAns() {
+      let decide = this.questionDecide.decide
+      let questionDecs = this.questionDecs
+      let queDesValue = ''
+      questionDecs.forEach(que => {
+        if (que.decide == decide)
+          queDesValue = que.value
+      })
+      return queDesValue
+    },
+    getTotalScore() {
+      let questionList = this.questionList
+      let totalScore = 0
+      questionList.forEach(que => {
+        totalScore = totalScore + que.score
+      })
+      return totalScore
+    }
+  },
   onLoad() {
     this.getQuestionList()
   },
   methods: {
+    changeDecideAns(event) {
+      let decide = event.detail.data.decide
+      this.questionDecide.decide = decide
+    },
+    submitForm(formId) {
+      this.$refs[formId].submit();
+    },
+    clearQuestionChoose() {
+      let questionChoose = this.questionChoose
+      questionChoose.title = ''
+      questionChoose.score = 1
+      questionChoose.answer = []
+      questionChoose.options.forEach(opt => {
+        opt.content = ''
+      })
+      this.questionChoose = questionChoose
+    },
+    clearQuestionDecide() {
+      let questionDecide = this.questionDecide
+      questionDecide.title = ''
+      questionDecide.score = 1
+      questionDecide.decide = true
+      this.questionDecide = questionDecide
+    },
     getQuestionList() {
       db.collection(dbCollectionName).limit(100).get().then(res => {
+        console.log("res.result.data", res.result.data)
         this.questionList = res.result.data
       }).catch(err => {
         uni.showModal({
@@ -153,8 +212,34 @@ export default {
         })
       })
     },
-    submitForm(formId) {
-      this.$refs[formId].submit();
+    deleteQuestion(queId) {
+      uni.showModal({
+        title: '提示',
+        content: "确认删除？",
+        showCancel: true,
+        success: (res) => {
+          if(res.cancel)
+            return
+          uni.showLoading({
+            title: '提交中...',
+            mask: true
+          })
+          db.collection(dbCollectionName).doc(queId).remove().then(res => {
+            uni.showToast({
+              title: '删除成功'
+            })
+          }).catch(err => {
+            uni.showModal({
+              title: '提示',
+              content: err.message,
+              showCancel: false
+            })
+          }).finally(() => {
+            uni.hideLoading()
+            this.getQuestionList()
+          })
+        }
+      })
     },
     submit(event) {
       const {
@@ -175,6 +260,11 @@ export default {
         uni.showToast({
           title: '新增成功'
         })
+        if (value.answer && value.answer.length > 0) {
+          this.clearQuestionChoose()
+        }else {
+          this.clearQuestionDecide()
+        }
       }).catch((err) => {
         uni.showModal({
           content: err.message || '请求服务失败',
