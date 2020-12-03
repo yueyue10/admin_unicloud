@@ -1,8 +1,9 @@
 <template>
 	<view v-if="showPopup" class="uni-popup" :class="[popupstyle]" @touchmove.stop.prevent="clear">
-		<uni-transition v-if="maskShow" class="uni-mask--hook" :mode-class="['fade']" :styles="maskClass" :duration="duration" :show="showTrans" @click="onTap" />
+		<uni-transition v-if="maskShow" class="uni-mask--hook" :mode-class="['fade']" :styles="maskClass" :duration="duration"
+		 :show="showTrans" @click="onTap" />
 		<uni-transition :mode-class="ani" :styles="transClass" :duration="duration" :show="showTrans" @click="onTap">
-			<view class="uni-popup__wrapper-box" @click.stop="clear">
+			<view class="uni-popup__wrapper-box" :style="{width:popup_width}" @click.stop="clear">
 				<slot />
 			</view>
 		</uni-transition>
@@ -49,6 +50,11 @@
 			maskClick: {
 				type: Boolean,
 				default: true
+			},
+			// 弹窗内容宽度
+			popupConWidth: {
+				type: String,
+				default: ''
 			}
 		},
 		provide() {
@@ -99,7 +105,8 @@
 				},
 				maskShow: true,
 				mkclick: true,
-				popupstyle: 'top'
+				popupstyle: 'top',
+				popup_width: 'auto'
 			}
 		},
 		created() {
@@ -109,6 +116,8 @@
 			} else {
 				this.duration = 0
 			}
+			if (this.popupConWidth)
+				this.popup_width = this.popupConWidth
 		},
 		methods: {
 			clear(e) {

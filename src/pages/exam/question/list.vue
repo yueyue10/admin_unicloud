@@ -6,42 +6,44 @@
         <view class="uni-sub-title"></view>
       </view>
       <view class="uni-group">
-        <input class="uni-search" type="text" v-model="query" placeholder="请输入搜索内容" />
+        <input class="uni-search" type="text" v-model="query" placeholder="请输入搜索内容"/>
         <button class="uni-button" type="default" size="mini" @click="search">搜索</button>
         <button class="uni-button" type="default" size="mini" @click="navigateTo('./add')">新增</button>
         <button class="uni-button" type="default" size="mini" @click="delTable">批量删除</button>
       </view>
     </view>
     <view class="uni-container">
-      <uni-clientdb ref="udb" :collection="collectionName" :options="options" :where="where" field="username,role{role_id,role_name},mobile,email,status,
-register_date"
-                    page-data="replace" :orderby="orderby" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
+      <uni-clientdb ref="udb" :collection="collectionName" :options="options" :where="where"
+                    field="title,type,status,create_date"
+                    page-data="replace" :orderby="orderby" :getcount="true" :page-size="options.pageSize"
+                    :page-current="options.pageCurrent"
                     v-slot:default="{data,pagination,loading,error}">
         <uni-table :loading="loading" :emptyText="error.message || '没有更多数据'" border stripe type="selection"
                    @selection-change="selectionChange">
           <uni-tr>
-            <uni-th align="center">用户名</uni-th>
-            <uni-th align="center">角色</uni-th>
-            <uni-th align="center">手机号</uni-th>
-            <uni-th align="center">邮箱</uni-th>
-            <uni-th align="center">用户状态</uni-th>
+            <uni-th align="center">题目</uni-th>
+            <uni-th align="center">类型</uni-th>
+            <uni-th align="center">状态</uni-th>
             <uni-th width="170" align="center">创建时间</uni-th>
             <uni-th width="204" align="center">操作</uni-th>
           </uni-tr>
           <uni-tr v-for="(item,index) in data" :key="index">
-            <uni-td align="center">{{item.username}}</uni-td>
-            <uni-td align="center">{{item.role ? item.role.map(item => item.role_name).join('、') : '-'}}</uni-td>
-            <uni-td align="center">{{item.mobile}}</uni-td>
-            <uni-td align="center">{{item.email}}</uni-td>
-            <uni-td align="center">{{item.role && item.role.includes('admin') ? '启用' : parseUserStatus(item.status)}}</uni-td>
+            <uni-td align="center">{{item.title}}</uni-td>
             <uni-td align="center">
-              <uni-dateformat :date="item.
-register_date" :threshold="[0, 0]" />
+              <text class="question-type" v-if="item.type ==0">选择题</text>
+              <text class="question-type" style="background: #cbdbff;" v-if="item.type ==1">判断题</text>
             </uni-td>
             <uni-td align="center">
-              <view v-if="item._id === userInfo._id">-</view>
-              <view v-else class="uni-group">
-                <button @click="navigateTo('./edit?id='+item._id)" class="uni-button" size="mini" type="primary">修改</button>
+              <text class="question-status" v-if="item.status ==0">编辑中</text>
+              <text class="question-status" style="background: #ff0000;" v-if="item.status ==1">已发布</text>
+            </uni-td>
+            <uni-td align="center">
+              <uni-dateformat :date="item.create_date" :threshold="[0, 0]"/>
+            </uni-td>
+            <uni-td align="center">
+              <view class="uni-group">
+                <button @click="navigateTo('./edit?id='+item._id)" class="uni-button" size="mini" type="primary">修改
+                </button>
                 <button @click="confirmDelete(item)" class="uni-button" size="mini" type="warn">删除</button>
               </view>
             </uni-td>
@@ -49,7 +51,7 @@ register_date" :threshold="[0, 0]" />
         </uni-table>
         <view class="uni-pagination-box">
           <uni-pagination show-icon :page-size="pagination.size" v-model="pagination.current" :total="pagination.count"
-                          @change="onPageChanged" />
+                          @change="onPageChanged"/>
         </view>
       </uni-clientdb>
     </view>
@@ -60,7 +62,7 @@ register_date" :threshold="[0, 0]" />
 const db = uniCloud.database()
 // 表查询配置
 const dbCollectionName = 'question'
-const dbOrderBy = '' // 排序字段
+const dbOrderBy = 'create_date' // 排序字段
 const dbSearchFields = [] // 支持模糊搜索的字段列表
 // 分页配置
 const pageSize = 10
@@ -69,6 +71,7 @@ const pageCurrent = 1
 import {
   mapState
 } from 'vuex'
+
 export default {
   data() {
     return {
@@ -150,32 +153,26 @@ export default {
       this.selectedIndexs = e.detail.index
     },
     confirmDelete(item) {
-      const currentUserId = this.userInfo._id
-      if (currentUserId === item._id) {
-        uni.showToast({
-          icon: 'none',
-          title: '不允许账号删除自己',
-          duration: 1500
-        })
-        return
-      }
-      this.$refs.udb.remove(id)
-    },
-    parseUserStatus(status) {
-      if (status === 0) {
-        return '启用'
-      } else if (status === 1) {
-        return '禁用'
-      } else if (status === 2) {
-        return '审核中'
-      } else if (status === 3) {
-        return '审核拒绝'
-      } else {
-        return '未知'
-      }
+      this.$refs.udb.remove(item._id)
     }
   }
 }
 </script>
 <style>
+.question-type,
+.question-status {
+  padding: 2px 4px;
+  border-radius: 5px;
+  font-size: smaller;
+}
+
+.question-type {
+  background: #c0ceb4;
+  color: gray;
+}
+
+.question-status {
+  background: #55aaff;
+  color: white;
+}
 </style>

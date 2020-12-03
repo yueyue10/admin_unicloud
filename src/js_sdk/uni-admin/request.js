@@ -23,7 +23,7 @@ export function request(action, data, {
 					url: config.login.url
 				})
 			}
-			const err = new Error(result.message)
+			const err = new Error(result.msg)
 			err.code = result.code
 			return Promise.reject(err)
 		}
