@@ -140,6 +140,46 @@
       "root": "pages/exam",
       "pages": [
         {
+          "path": "exam/list",
+          "style": {
+            "navigationBarTitleText": "考试列表",
+            "enablePullDownRefresh": false
+          }
+        },
+        {
+          "path": "exam/add",
+          "style": {
+            "navigationBarTitleText": "新增考试",
+            "enablePullDownRefresh": false
+          }
+        },{
+          "path": "exam/edit",
+          "style": {
+            "navigationBarTitleText": "修改考试",
+            "enablePullDownRefresh": false
+          }
+        },
+        {
+          "path": "paper/list",
+          "style": {
+            "navigationBarTitleText": "试卷列表",
+            "enablePullDownRefresh": false
+          }
+        },
+        {
+          "path": "paper/add",
+          "style": {
+            "navigationBarTitleText": "新增试卷",
+            "enablePullDownRefresh": false
+          }
+        },{
+          "path": "paper/edit",
+          "style": {
+            "navigationBarTitleText": "修改试卷",
+            "enablePullDownRefresh": false
+          }
+        },
+        {
           "path": "question/list",
           "style": {
             "navigationBarTitleText": "考题列表",
