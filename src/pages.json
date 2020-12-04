@@ -172,12 +172,6 @@
             "navigationBarTitleText": "新增试卷",
             "enablePullDownRefresh": false
           }
-        },{
-          "path": "paper/edit",
-          "style": {
-            "navigationBarTitleText": "修改试卷",
-            "enablePullDownRefresh": false
-          }
         },
         {
           "path": "question/list",

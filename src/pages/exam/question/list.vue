@@ -41,7 +41,7 @@
               <uni-dateformat :date="item.create_date" :threshold="[0, 0]"/>
             </uni-td>
             <uni-td align="center">
-              <view class="uni-group">
+              <view class="uni-group" v-if="item.status==0">
                 <button @click="navigateTo('./edit?id='+item._id)" class="uni-button" size="mini" type="primary">修改
                 </button>
                 <button @click="confirmDelete(item)" class="uni-button" size="mini" type="warn">删除</button>
@@ -62,7 +62,7 @@
 const db = uniCloud.database()
 // 表查询配置
 const dbCollectionName = 'question'
-const dbOrderBy = 'create_date' // 排序字段
+const dbOrderBy = 'create_date desc' // 排序字段
 const dbSearchFields = [] // 支持模糊搜索的字段列表
 // 分页配置
 const pageSize = 10

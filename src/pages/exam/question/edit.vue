@@ -1,192 +1,212 @@
 <template>
-  <view class="uni-container">
-    <uni-forms ref="form" v-model="formData" :rules="rules" validateTrigger="bind" @submit="submit">
-      <uni-forms-item name="username" label="用户名">
-        <input placeholder="请输入用户名" @input="binddata('username', $event.detail.value)" class="uni-input-border"
-               :value="formData.username"/>
-      </uni-forms-item>
-      <!-- <uni-forms-item name="password" label="初始密码">
-        <input placeholder="请输入初始密码" @input="binddata('password', $event.detail.value)" class="uni-input-border" :value="formData.password" />
-      </uni-forms-item> -->
-      <uni-forms-item name="role" label="角色列表">
-        <uni-data-checklist multiple v-if="roles.length" :value="formData.role" :range="roles"
-                            @change="binddata('role', $event.detail.value)"></uni-data-checklist>
-        <view v-else class="uni-form-item-empty">
-          暂无
-        </view>
-      </uni-forms-item>
-      <uni-forms-item name="mobile" label="手机号">
-        <input placeholder="手机号" @input="binddata('mobile', $event.detail.value)" class="uni-input-border"
-               :value="formData.mobile"/>
-      </uni-forms-item>
-      <uni-forms-item name="email" label="邮箱">
-        <input placeholder="邮箱" @input="binddata('email', $event.detail.value)" class="uni-input-border"
-               :value="formData.email"/>
-      </uni-forms-item>
-      <uni-forms-item name="status" label="是否启用">
-        <switch v-if="typeof formData.status === 'boolean'" @change="binddata('status', $event.detail.value)"
-                :checked="formData.status"/>
-        <view v-else class="uni-form-item-empty">{{formData.status}}</view>
-      </uni-forms-item>
-      <view class="uni-button-group">
-        <button style="width: 100px;" type="primary" class="uni-button" @click="submitForm">提交</button>
-        <navigator open-type="navigateBack" style="margin-left: 15px;">
-          <button style="width: 100px;" class="uni-button">返回</button>
-        </navigator>
-      </view>
-    </uni-forms>
-  </view>
+	<view class="uni-container">
+		<!--=========================选择题逻辑===================-->
+		<uni-forms v-if="questionType==0" ref="form1" v-model="questionChoose" :rules="rules" validateTrigger="bind" @submit="submit">
+			<uni-forms-item name="title" label="问题题目">
+				<input placeholder="请输入问题题目" @input="questionChoose.title=$event.detail.value" class="uni-input-border" :value="questionChoose.title" />
+			</uni-forms-item>
+			<uni-forms-item name="options" label="答案选项">
+				<view class="hor-layout-center" v-for="(item,index) in questionChoose.options">
+					<text>{{item.text}}</text>
+					<input style="margin-left: 10px;width: 80%" placeholder="请输入答案项" @input="item.content=$event.detail.value" class="uni-input-border"
+					 :value="item.content" />
+				</view>
+			</uni-forms-item>
+			<uni-forms-item name="answer" label="问题答案">
+				<uni-data-checklist multiple :range="questionOpts" :value="questionChoose.answer" @change="questionChoose.answer=$event.detail.value"></uni-data-checklist>
+			</uni-forms-item>
+			<uni-forms-item name="score" label="问题分数">
+				<input placeholder="请输入问题分数" @input="questionChoose.score=$event.detail.value" class="uni-input-border" :value="questionChoose.score"
+				 type="number" />
+			</uni-forms-item>
+			<view class="uni-button-group">
+				<button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form1')">提交</button>
+				<navigator open-type="navigateBack" style="margin-left: 15px;"><button style="width: 100px;" class="uni-button">返回</button></navigator>
+			</view>
+		</uni-forms>
+		<!--=========================判断题逻辑===================-->
+		<uni-forms v-if="questionType==1" ref="form2" v-model="questionDecide" :rules="rules" validateTrigger="bind" @submit="submit">
+			<uni-forms-item name="title" label="问题题目">
+				<input placeholder="请输入问题题目" @input="binddata('title', $event.detail.value)" class="uni-input-border" :value="questionDecide.title" />
+			</uni-forms-item>
+			<uni-forms-item name="decide" label="问题答案">
+				<uni-data-checklist :range="questionDecs" :value="getDecideAns" @change="changeDecideAns"></uni-data-checklist>
+			</uni-forms-item>
+			<uni-forms-item name="score" label="问题分数">
+				<input placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border" :value="questionDecide.score"
+				 type="number" />
+			</uni-forms-item>
+			<view class="uni-button-group">
+				<button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form2')">提交</button>
+				<navigator open-type="navigateBack" style="margin-left: 15px;"><button style="width: 100px;" class="uni-button">返回</button></navigator>
+			</view>
+		</uni-forms>
+	</view>
 </template>
 
 <script>
-import validator from '@/js_sdk/validator/uni-id-users.js';
+	import validator from '@/js_sdk/validator/question.js';
 
-const db = uniCloud.database();
-const dbCmd = db.command;
-const dbCollectionName = 'uni-id-users';
+	const db = uniCloud.database();
+	const dbCmd = db.command;
+	const dbCollectionName = 'question';
 
-function getValidator(fields) {
-  let reuslt = {}
-  for (let key in validator) {
-    if (fields.includes(key)) {
-      reuslt[key] = validator[key]
-    }
-  }
-  return reuslt
-}
+	function getValidator(fields) {
+		let reuslt = {}
+		for (let key in validator) {
+			if (fields.includes(key)) {
+				reuslt[key] = validator[key]
+			}
+		}
+		return reuslt
+	}
 
-export default {
-  data() {
-    return {
-      formData: {
-        "username": "",
-        "password": "",
-        "role": [],
-        "mobile": "",
-        "email": "",
-        "status": false //默认开启
-      },
-      rules: {
-        ...getValidator(["username", "password", "role", "mobile", "email"])
-      },
-      roles: []
-    }
-  },
-  onLoad(e) {
-    const id = e.id
-    this.formDataId = id
-    this.getDetail(id)
-    this.loadroles()
+	export default {
+		data() {
+			return {
+				questionDecs: [{
+						"text": "正确",
+						"value": '正确',
+						"decide": true
+					},
+					{
+						"text": "错误",
+						"value": '错误',
+						"decide": false
+					}
+				],
+				questionOpts: [{
+						"text": "A",
+						"value": 'A'
+					},
+					{
+						"text": "B",
+						"value": "B"
+					},
+					{
+						"text": "C",
+						"value": "C"
+					},
+					{
+						"text": "D",
+						"value": "D"
+					}
+				],
+				questionChoose: {
+					"title": "",
+					"options": [{
+							"text": "A",
+							"content": ''
+						},
+						{
+							"text": "B",
+							"content": ""
+						},
+						{
+							"text": "C",
+							"content": ""
+						},
+						{
+							"text": "D",
+							"content": ""
+						}
+					],
+					"answer": [],
+					"score": 1
+				},
+				questionDecide: {
+					"title": "",
+					"decide": true,
+					"score": 1
+				},
+				questionType: -1,
+				formDataId: '',
+				rules: {
+					...getValidator(["title", "options", "answer", "score"])
+				}
+			}
+		},
+		computed: {
+			getDecideAns() {
+				let decide = this.questionDecide.decide
+				let questionDecs = this.questionDecs
+				let queDesValue = ''
+				questionDecs.forEach(que => {
+					if (que.decide == decide)
+						queDesValue = que.value
+				})
+				return queDesValue
+			},
+		},
+		onLoad(e) {
+			const id = e.id
+			this.formDataId = id
+			this.getDetail(id)
+		},
+		methods: {
+			changeDecideAns(event) {
+				let decide = event.detail.data.decide
+				this.questionDecide.decide = decide
+			},
+			submitForm(formId) {
+				this.$refs[formId].submit();
+			},
+			submit(event) {
+				const {
+					value,
+					errors
+				} = event.detail
+				// alert(JSON.stringify(value))
+				// 表单校验失败页面会提示报错 ，要停止表单提交逻辑
+				if (errors)
+					return
+				uni.showLoading({
+					title: '修改中...',
+					mask: true
+				})
 
-  },
-  methods: {
-    /**
-     * 触发表单提交
-     */
-    submitForm(form) {
-      this.$refs.form.submit();
-    },
-
-    /**
-     * 表单提交
-     * @param {Object} event 回调参数 Function(callback:{value,errors})
-     */
-    submit(event) {
-      const {
-        value,
-        errors
-      } = event.detail
-
-      // 表单校验失败页面会提示报错 ，要停止表单提交逻辑
-      if (errors) {
-        return
-      }
-      uni.showLoading({
-        title: '修改中...',
-        mask: true
-      })
-
-      // 是否启用功能的数据类型转换， 0 正常， 1 禁用
-      if (typeof value.status === "boolean") {
-        value.status = Number(!value.status)
-      }
-      // 使用 uni-clientDB 提交数据
-      db.collection(dbCollectionName).where({
-        _id: this.formDataId
-      }).update(value).then((res) => {
-        uni.showToast({
-          title: '修改成功'
-        })
-        this.getOpenerEventChannel().emit('refreshData')
-        setTimeout(() => uni.navigateBack(), 500)
-      }).catch((err) => {
-        uni.showModal({
-          content: err.message || '请求服务失败',
-          showCancel: false
-        })
-      }).finally(() => {
-        uni.hideLoading()
-      })
-    },
-
-    /**
-     * 获取表单数据
-     * @param {Object} id
-     */
-    getDetail(id) {
-      uni.showLoading({
-        mask: true
-      })
-      db.collection(dbCollectionName).where({
-        _id: id
-      }).get().then((res) => {
-        const data = res.result.data[0]
-        if (data) {
-          // Object.keys(this.formData).forEach(name => {
-          // 	this.binddata(name, data[name])
-          // })
-          const status = data.status
-          if (status < 2) {
-            data.status = !status
-            this.formData = data
-          } else if (status === 2) {
-            this.formData.status = '审核中'
-          } else if (status === 3) {
-            this.formData.status = '审核拒绝'
-          } else {
-            this.formData.status = '未知状态'
-          }
-
-        }
-      }).catch((err) => {
-        uni.showModal({
-          content: err.message || '请求服务失败',
-          showCancel: false
-        })
-      }).finally(() => {
-        uni.hideLoading()
-      })
-    },
-    loadroles() {
-      db.collection('uni-id-roles').limit(500).get().then(res => {
-        this.roles = res.result.data.map(item => {
-          return {
-            value: item.role_id,
-            text: item.role_name
-          }
-        })
-        this.roles.unshift({
-          value: 'admin',
-          text: 'admin'
-        })
-      }).catch(err => {
-        uni.showModal({
-          title: '提示',
-          content: err.message,
-          showCancel: false
-        })
-      })
-    }
-  }
-}
+				// 使用 uni-clientDB 提交数据
+				db.collection(dbCollectionName).where({
+					_id: this.formDataId
+				}).update(value).then((res) => {
+					uni.showToast({
+						title: '修改成功'
+					})
+					this.getOpenerEventChannel().emit('refreshData')
+					setTimeout(() => uni.navigateBack(), 500)
+				}).catch((err) => {
+					uni.showModal({
+						content: err.message || '请求服务失败',
+						showCancel: false
+					})
+				}).finally(() => {
+					uni.hideLoading()
+				})
+			},
+			getDetail(id) {
+				uni.showLoading({
+					mask: true
+				})
+				db.collection(dbCollectionName).where({
+					_id: id
+				}).get().then((res) => {
+					const data = res.result.data[0]
+					console.log("data============", data)
+					this.questionType = data.type
+					if (data.type == 0) {
+						this.questionChoose = data
+					} else {
+						this.questionDecide = data
+					}
+				}).catch((err) => {
+					uni.showModal({
+						content: err.message || '请求服务失败',
+						showCancel: false
+					})
+				}).finally(() => {
+					uni.hideLoading()
+				})
+			}
+		}
+	}
 </script>

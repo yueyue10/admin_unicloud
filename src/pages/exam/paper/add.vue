@@ -1,359 +1,476 @@
 <template>
-  <view class="uni-container">
-    <view class="uni-group">
-      <view class="uni-title" style="font-weight: bolder">新增试题</view>
-      <view style="color: #dd524d">总分:{{getTotalScore}}</view>
-    </view>
-    <view class="uni-container">
-      <!--所有题目-->
-      <view v-for="(item,index) in questionList">
-        <view style="font-weight: bolder;margin-top: 20px">
-          {{index + 1}}、{{item.title}}
-          <text v-if="item.answer&&item.answer.length>0">【选择题】</text>
-          <text v-else>【判断题】</text>
-          <uni-icons class="uni-icons-trash" @click="deleteQuestion(item._id)"></uni-icons>
-        </view>
-        <view style="margin-top: 10px" class="hor-layout-center">
-          <view v-for="(opt,idx) in item.options" style="margin: 0px 10px">
-            <text style="color: #99a9bf">{{opt.text}}.</text>
-            {{opt.content}}
-          </view>
-        </view>
-        <view style="margin-top: 5px">
-          答案：
-          <text v-for="(ans,idx) in item.answer">
-            {{ans}}
-          </text>
-          <text v-if="item.decide">正确</text>
-          <text v-if="!item.decide">错误</text>
-        </view>
-        <view style="margin-top: 5px;color: #dd524d">分数：{{item.score}}</view>
-      </view>
-    </view>
+	<view class="uni-container">
+		<view class="uni-group">
+			<view class="uni-title" style="font-weight: bolder;font-size: x-large;">
+				{{paperId?'修改试卷':'新增试卷'}}
+			</view>
+			<view style="color: #dd524d">总分:{{getTotalScore}}</view>
+		</view>
+		<view class="uni-container">
+			<!-- 试卷题目 -->
+			<view class="hor-layout-center" style="margin-top: 50px;margin-bottom: 15px;">
+				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
+				<view style="font-weight: bold;margin-right: 15px;">试卷题目</view>
+				<input placeholder="请输入试卷题目" @input="paperTitle=$event.detail.value" style="width: 50%" class="uni-input-border"
+				 :value="paperTitle" />
+			</view>
+			<!-- 选择角色 -->
+			<view class="hor-layout-center" style="margin-bottom: 15px;">
+				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
+				<view style="font-weight: bold;margin-right: 15px;">选择用户等级</view>
+				<uni-data-checklist multiple :range="roles" :value="selRoles" @change="selRoles= $event.detail.value"></uni-data-checklist>
+			</view>
+			<!--所有题目-->
+			<view class="question-list" v-if="questionList&&questionList.length>0">
+				<view v-for="(item,index) in questionList">
+					<view style="font-weight: bolder;margin-top: 20px">
+						{{index + 1}}、{{item.title}}
+						<text v-if="item.type==0">【选择题】</text>
+						<text v-else>【判断题】</text>
+						<uni-icons class="uni-icons-trash" style="color: #00FF00;padding: 5px;" @click="deleteQuestion(item._id)"></uni-icons>
+						<uni-icons class="uni-icons-compose" style="color: #007aff;" @click="updateQuestion(item)"></uni-icons>
+					</view>
+					<view v-if="item.options&&item.options.length>0" class="hor-layout-center" style="margin-top: 7px;margin-left: 13px;">
+						<view v-for="(opt,idx) in item.options" style="margin: 0px 10px">
+							<text style="color: #8e8ed3">{{opt.text}}.</text>
+							<text>{{opt.content}}</text>
+						</view>
+					</view>
+					<view style="margin-top: 7px;margin-left: 23px;">
+						答案：
+						<block v-if="item.type==0">
+							<text v-for="(ans,idx) in item.answer">
+								{{idx==0?'':'、'}}{{ans}}
+							</text>
+						</block>
+						<block v-else>
+							<text v-if="item.decide">正确</text>
+							<text v-if="!item.decide">错误</text>
+						</block>
+					</view>
+					<view style="margin-top: 7px;margin-left: 23px;color: #dd524d">分数：{{item.score}}</view>
+				</view>
+			</view>
+		</view>
 
-    <!--新增题目-->
-    <view class="uni-group question-action hor-layout-side" style="width: 80%;" v-if="questionType==0">
-      <button type="warn" class="uni-button" @click="">发布试卷</button>
-      <view class="hor-layout">
-        <button type="primary" class="uni-button" @click="openPopup('choose_popup')">增加选择题</button>
-        <button type="primary" class="uni-button" @click="openPopup('decide_popup')">增加判断题</button>
-        <navigator open-type="navigateBack" style="margin-left: 15px;">
-          <button style="width: 100px;" class="uni-button">返回</button>
-        </navigator>
-      </view>
-    </view>
-    <!--=========================新增选择题弹窗===================-->
-    <uni-popup ref="choose_popup" popupConWidth="90%">
-      <view class="uni-group question-content">
-        <uni-forms class="uni-forms" style="width: 90%;max-width: 90%;" ref="form1" v-model="questionChoose"
-                   :rules="rules"
-                   validateTrigger="bind" @submit="submit">
-          <uni-forms-item name="index">
-            <view style="font-weight: bold">第{{questionList.length + 1}}题</view>
-          </uni-forms-item>
-          <uni-forms-item name="title" label="问题题目">
-            <input placeholder="请输入问题题目" @input="binddata('title', $event.detail.value)" class="uni-input-border"
-                   :value="questionChoose.title"/>
-          </uni-forms-item>
-          <uni-forms-item name="options" label="答案选项">
-            <view class="hor-layout-center" v-for="(item,index) in questionChoose.options">
-              <text>{{item.text}}</text>
-              <input style="margin-left: 10px;width: 80%" placeholder="请输入答案项" @input="item.content=$event.detail.value"
-                     class="uni-input-border"
-                     :value="item.content"/>
-            </view>
-          </uni-forms-item>
-          <uni-forms-item name="answer" label="问题答案">
-            <uni-data-checklist multiple :range="questionOpts" :value="questionChoose.answer"
-                                @change="binddata('answer', $event.detail.value)"></uni-data-checklist>
-          </uni-forms-item>
-          <uni-forms-item name="score" label="问题分数">
-            <input placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border"
-                   :value="questionChoose.score"
-                   type="number"/>
-          </uni-forms-item>
-          <view class="uni-button-group">
-            <button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form1')">提交</button>
-            <button style="width: 100px;" type="warn" class="uni-button" @click="closePopup('choose_popup')">返回</button>
-          </view>
-        </uni-forms>
-      </view>
-    </uni-popup>
-    <!--=========================新增判断题弹窗==========================-->
-    <uni-popup ref="decide_popup" popupConWidth="90%">
-      <view class="uni-group question-content">
-        <uni-forms class="uni-forms" style="width: 90%;max-width: 90%;" ref="form2" v-model="questionDecide"
-                   :rules="rules"
-                   validateTrigger="bind" @submit="submit">
-          <uni-forms-item name="index">
-            <view style="font-weight: bold">第{{questionList.length + 1}}题</view>
-          </uni-forms-item>
-          <uni-forms-item name="title" label="问题题目">
-            <input placeholder="请输入问题题目" @input="binddata('title', $event.detail.value)" class="uni-input-border"
-                   :value="questionDecide.title"/>
-          </uni-forms-item>
-          <uni-forms-item name="decide" label="问题答案">
-            <uni-data-checklist :range="questionDecs" :value="getDecideAns"
-                                @change="changeDecideAns"></uni-data-checklist>
-          </uni-forms-item>
-          <uni-forms-item name="score" label="问题分数">
-            <input placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border"
-                   :value="questionDecide.score"
-                   type="number"/>
-          </uni-forms-item>
-          <view class="uni-button-group">
-            <button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form2')">提交</button>
-            <button style="width: 100px;" type="warn" class="uni-button" @click="closePopup('decide_popup')">返回</button>
-          </view>
-        </uni-forms>
-      </view>
-    </uni-popup>
-  </view>
+		<!--新增题目-->
+		<view class="uni-group question-action hor-layout-side" style="width: 80%;" v-if="questionType==0">
+			<button type="warn" class="uni-button" v-if="!paperId" @click="createPaper">发布试卷</button>
+			<view class="hor-layout">
+				<button type="primary" class="uni-button" @click="openPopup('choose_popup')">增加选择题</button>
+				<button type="primary" class="uni-button" @click="openPopup('decide_popup')">增加判断题</button>
+				<navigator open-type="navigateBack" style="margin-left: 15px;">
+					<button style="width: 100px;" class="uni-button">返回</button>
+				</navigator>
+			</view>
+		</view>
+		<!--=========================新增选择题弹窗===================-->
+		<uni-popup ref="choose_popup" popupConWidth="90%">
+			<view class="uni-group question-content">
+				<uni-forms class="uni-forms" style="width: 90%;max-width: 90%;" ref="form1" v-model="questionChoose" :rules="rules"
+				 validateTrigger="bind" @submit="submit">
+					<uni-forms-item name="index">
+						<view style="font-weight: bold">第{{questionChoose.index}}题</view>
+					</uni-forms-item>
+					<uni-forms-item name="title" label="问题题目">
+						<input placeholder="请输入问题题目" @input="binddata('title', $event.detail.value)" class="uni-input-border" :value="questionChoose.title" />
+					</uni-forms-item>
+					<uni-forms-item name="options" label="答案选项">
+						<view class="hor-layout-center" v-for="(item,index) in questionChoose.options">
+							<text>{{item.text}}</text>
+							<input style="margin-left: 10px;width: 80%" placeholder="请输入答案项" @input="item.content=$event.detail.value" class="uni-input-border"
+							 :value="item.content" />
+						</view>
+					</uni-forms-item>
+					<uni-forms-item name="answer" label="问题答案">
+						<uni-data-checklist multiple :range="questionOpts" :value="questionChoose.answer" @change="binddata('answer', $event.detail.value)"></uni-data-checklist>
+					</uni-forms-item>
+					<uni-forms-item name="score" label="问题分数">
+						<input placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border" :value="questionChoose.score"
+						 type="number" />
+					</uni-forms-item>
+					<view class="uni-button-group">
+						<button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form1')">提交</button>
+						<button style="width: 100px;" type="warn" class="uni-button" @click="closePopup('choose_popup')">返回</button>
+					</view>
+				</uni-forms>
+			</view>
+		</uni-popup>
+		<!--=========================新增判断题弹窗==========================-->
+		<uni-popup ref="decide_popup" popupConWidth="90%">
+			<view class="uni-group question-content">
+				<uni-forms class="uni-forms" style="width: 90%;max-width: 90%;" ref="form2" v-model="questionDecide" :rules="rules"
+				 validateTrigger="bind" @submit="submit">
+					<uni-forms-item name="index">
+						<view style="font-weight: bold">第{{questionDecide.index}}题</view>
+					</uni-forms-item>
+					<uni-forms-item name="title" label="问题题目">
+						<input placeholder="请输入问题题目" @input="binddata('title', $event.detail.value)" class="uni-input-border" :value="questionDecide.title" />
+					</uni-forms-item>
+					<uni-forms-item name="decide" label="问题答案">
+						<uni-data-checklist :range="questionDecs" :value="getDecideAns" @change="changeDecideAns"></uni-data-checklist>
+					</uni-forms-item>
+					<uni-forms-item name="score" label="问题分数">
+						<input placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border" :value="questionDecide.score"
+						 type="number" />
+					</uni-forms-item>
+					<view class="uni-button-group">
+						<button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form2')">提交</button>
+						<button style="width: 100px;" type="warn" class="uni-button" @click="closePopup('decide_popup')">返回</button>
+					</view>
+				</uni-forms>
+			</view>
+		</uni-popup>
+	</view>
 </template>
 
 <script>
-import validator from '@/js_sdk/validator/question.js';
-import UniIcons from "@/components/uni-icons/uni-icons";
+	import validator from '@/js_sdk/validator/question.js';
+	import UniIcons from "@/components/uni-icons/uni-icons";
 
-const db = uniCloud.database();
-const dbCmd = db.command;
-const dbCollectionName = 'question';
+	const db = uniCloud.database();
+	const dbCmd = db.command;
 
-function getValidator(fields) {
-  let reuslt = {}
-  for (let key in validator) {
-    if (fields.includes(key)) {
-      reuslt[key] = validator[key]
-    }
-  }
-  return reuslt
-}
+	function getValidator(fields) {
+		let reuslt = {}
+		for (let key in validator) {
+			if (fields.includes(key)) {
+				reuslt[key] = validator[key]
+			}
+		}
+		return reuslt
+	}
 
-export default {
-  components: {
-    UniIcons
-  },
-  data() {
-    return {
-      questionDecs: [{
-        "text": "正确",
-        "value": '正确',
-        "decide": true
-      },
-        {
-          "text": "错误",
-          "value": '错误',
-          "decide": false
-        }
-      ],
-      questionOpts: [{
-        "text": "A",
-        "value": 'A'
-      },
-        {
-          "text": "B",
-          "value": "B"
-        },
-        {
-          "text": "C",
-          "value": "C"
-        },
-        {
-          "text": "D",
-          "value": "D"
-        }
-      ],
-      questionList: [],
-      questionType: 0,
-      questionChoose: {
-        "index": 0,
-        "title": "",
-        "options": [{
-          "text": "A",
-          "content": ''
-        },
-          {
-            "text": "B",
-            "content": ""
-          },
-          {
-            "text": "C",
-            "content": ""
-          },
-          {
-            "text": "D",
-            "content": ""
-          }
-        ],
-        "answer": [],
-        "score": 1
-      },
-      questionDecide: {
-        "index": 0,
-        "title": "",
-        "decide": true,
-        "score": 1
-      },
-      rules: {
-        ...getValidator(["title", "options", "answer", "score"])
-      },
-      roles: []
-    }
-  },
-  computed: {
-    getDecideAns() {
-      let decide = this.questionDecide.decide
-      let questionDecs = this.questionDecs
-      let queDesValue = ''
-      questionDecs.forEach(que => {
-        if (que.decide == decide)
-          queDesValue = que.value
-      })
-      return queDesValue
-    },
-    getTotalScore() {
-      let questionList = this.questionList
-      let totalScore = 0
-      questionList.forEach(que => {
-        totalScore = totalScore + que.score
-      })
-      return totalScore
-    }
-  },
-  onLoad() {
-    this.getQuestionList()
-  },
-  methods: {
-    changeDecideAns(event) {
-      let decide = event.detail.data.decide
-      this.questionDecide.decide = decide
-    },
-    submitForm(formId) {
-      this.$refs[formId].submit();
-    },
-    openPopup(popFlag) {
-      this.questionType = 1
-      this.$refs[popFlag].open()
-    },
-    closePopup(popFlag) {
-      this.questionType = 0
-      this.$refs[popFlag].close()
-    },
-    clearQuestionChoose() {
-      let questionChoose = this.questionChoose
-      questionChoose.title = ''
-      questionChoose.score = 1
-      questionChoose.answer = []
-      questionChoose.options.forEach(opt => {
-        opt.content = ''
-      })
-      this.questionChoose = questionChoose
-    },
-    clearQuestionDecide() {
-      let questionDecide = this.questionDecide
-      questionDecide.title = ''
-      questionDecide.score = 1
-      questionDecide.decide = true
-      this.questionDecide = questionDecide
-    },
-    getQuestionList() {
-      db.collection(dbCollectionName).limit(100).get().then(res => {
-        console.log("res.result.data", res.result.data)
-        this.questionList = res.result.data
-      }).catch(err => {
-        uni.showModal({
-          title: '提示',
-          content: err.message,
-          showCancel: false
-        })
-      })
-    },
-    deleteQuestion(queId) {
-      uni.showModal({
-        title: '提示',
-        content: "确认删除？",
-        showCancel: true,
-        success: (res) => {
-          if (res.cancel)
-            return
-          uni.showLoading({
-            title: '提交中...',
-            mask: true
-          })
-          db.collection(dbCollectionName).doc(queId).remove().then(res => {
-            uni.showToast({
-              title: '删除成功'
-            })
-          }).catch(err => {
-            uni.showModal({
-              title: '提示',
-              content: err.message,
-              showCancel: false
-            })
-          }).finally(() => {
-            uni.hideLoading()
-            this.getQuestionList()
-          })
-        }
-      })
-    },
-    submit(event) {
-      const {
-        value,
-        errors
-      } = event.detail
-      // 表单校验失败页面会提示报错 ，要停止表单提交逻辑
-      if (errors) {
-        return
-      }
-      value.type = value.answer ? 0 : 1
-      value.status = 0
-      alert(JSON.stringify(value))
-      uni.showLoading({
-        title: '提交中...',
-        mask: true
-      })
-      // 使用 uni-clientDB 提交数据
-      db.collection(dbCollectionName).add(value).then((res) => {
-        uni.showToast({
-          title: '新增成功'
-        })
-        if (value.answer && value.answer.length > 0) {
-          this.clearQuestionChoose()
-          this.closePopup('choose_popup')
-        } else {
-          this.clearQuestionDecide()
-          this.closePopup('decide_popup')
-        }
-      }).catch((err) => {
-        uni.showModal({
-          content: err.message || '请求服务失败',
-          showCancel: false
-        })
-      }).finally(() => {
-        uni.hideLoading()
-        this.questionType = 0
-        this.getQuestionList()
-      })
-    }
-  }
-}
+	export default {
+		components: {
+			UniIcons
+		},
+		data() {
+			return {
+				questionDecs: [{
+						"text": "正确",
+						"value": '正确',
+						"decide": true
+					},
+					{
+						"text": "错误",
+						"value": '错误',
+						"decide": false
+					}
+				],
+				questionOpts: [{
+						"text": "A",
+						"value": 'A'
+					},
+					{
+						"text": "B",
+						"value": "B"
+					},
+					{
+						"text": "C",
+						"value": "C"
+					},
+					{
+						"text": "D",
+						"value": "D"
+					}
+				],
+				questionList: [],
+				questionType: 0,
+				questionChoose: {
+					"index": 0,
+					"title": "",
+					"options": [{
+							"text": "A",
+							"content": ''
+						},
+						{
+							"text": "B",
+							"content": ""
+						},
+						{
+							"text": "C",
+							"content": ""
+						},
+						{
+							"text": "D",
+							"content": ""
+						}
+					],
+					"answer": [],
+					"score": 1
+				},
+				questionDecide: {
+					"index": 0,
+					"title": "",
+					"decide": true,
+					"score": 1
+				},
+				rules: {
+					...getValidator(["title", "options", "answer", "score"])
+				},
+				selRoles: [],
+				paperTitle: '',
+				paperId: '',
+				roles: []
+			}
+		},
+		computed: {
+			getDecideAns() {
+				let decide = this.questionDecide.decide
+				let questionDecs = this.questionDecs
+				let queDesValue = ''
+				questionDecs.forEach(que => {
+					if (que.decide == decide)
+						queDesValue = que.value
+				})
+				return queDesValue
+			},
+			getTotalScore() {
+				let questionList = this.questionList
+				let totalScore = 0
+				questionList.forEach(que => {
+					totalScore = totalScore + que.score
+				})
+				return totalScore
+			}
+		},
+		onLoad(event) {
+			this.loadroles()
+			if (event.id) {
+				this.paperId = event.id
+				this.getPaperDetail()
+				return
+			}
+			this.getQuestionList()
+		},
+		methods: {
+			changeDecideAns(event) {
+				let decide = event.detail.data.decide
+				this.questionDecide.decide = decide
+			},
+			submitForm(formId) {
+				this.$refs[formId].submit();
+			},
+			openPopup(popFlag) {
+				this.questionType = 1
+				this.questionChoose.index = this.questionList.length + 1
+				this.questionDecide.index = this.questionList.length + 1
+				this.$refs[popFlag].open()
+			},
+			closePopup(popFlag) {
+				this.questionType = 0
+				this.$refs[popFlag].close()
+			},
+			clearQuestionChoose() {
+				let questionChoose = this.questionChoose
+				questionChoose.title = ''
+				questionChoose.score = 1
+				questionChoose.answer = []
+				questionChoose.options.forEach(opt => {
+					opt.content = ''
+				})
+				this.questionChoose = questionChoose
+			},
+			clearQuestionDecide() {
+				let questionDecide = this.questionDecide
+				questionDecide.title = ''
+				questionDecide.score = 1
+				questionDecide.decide = true
+				this.questionDecide = questionDecide
+			},
+			getQuestionList() {
+				db.collection('question').where({
+					status: 0
+				}).limit(100).get().then(res => {
+					console.log("res.result.data", res.result.data)
+					this.questionList = res.result.data
+				}).catch(err => {
+					uni.showModal({
+						title: '提示',
+						content: err.message,
+						showCancel: false
+					})
+				})
+			},
+			loadroles() {
+				db.collection('uni-id-roles').limit(500).get().then(res => {
+					this.roles = res.result.data.map(item => {
+						return {
+							value: item.role_id,
+							text: item.role_name
+						}
+					})
+					this.roles.unshift({
+						value: 'admin',
+						text: 'admin'
+					})
+				}).catch(err => {
+					uni.showModal({
+						title: '提示',
+						content: err.message,
+						showCancel: false
+					})
+				})
+			},
+			deleteQuestion(queId) {
+				// todo 如果是修改试卷的话，需要同时修改试卷内容
+				uni.showModal({
+					title: '提示',
+					content: "确认删除？",
+					showCancel: true,
+					success: (res) => {
+						if (res.cancel)
+							return
+						uni.showLoading({
+							title: '提交中...',
+							mask: true
+						})
+						db.collection('question').doc(queId).remove().then(res => {
+							uni.showToast({
+								title: '删除成功'
+							})
+						}).catch(err => {
+							uni.showToast({
+								title: err.message
+							})
+						}).finally(() => {
+							uni.hideLoading()
+							this.getQuestionList()
+						})
+					}
+				})
+			},
+			updateQuestion(queItem) {
+				if (queItem.type == 0) {
+					this.questionChoose = queItem
+					this.openPopup('choose_popup')
+				} else {
+					this.questionDecide = queItem
+					this.openPopup('decide_popup')
+				}
+			},
+			submit(event) {
+				// todo 如果是修改试卷的话，需要同时修改试卷内容
+				const {
+					value,
+					errors
+				} = event.detail
+				// 表单校验失败页面会提示报错 ，要停止表单提交逻辑
+				if (errors) {
+					return
+				}
+				value.type = value.answer ? 0 : 1
+				value.status = 0
+				// alert(JSON.stringify(value))
+				uni.showLoading({
+					title: '提交中...',
+					mask: true
+				})
+				// 使用 uni-clientDB 提交数据
+				db.collection('question').add(value).then((res) => {
+					uni.showToast({
+						title: '新增成功'
+					})
+					if (value.answer && value.answer.length > 0) {
+						this.clearQuestionChoose()
+						this.closePopup('choose_popup')
+					} else {
+						this.clearQuestionDecide()
+						this.closePopup('decide_popup')
+					}
+				}).catch((err) => {
+					uni.showModal({
+						content: err.message || '请求服务失败',
+						showCancel: false
+					})
+				}).finally(() => {
+					uni.hideLoading()
+					this.questionType = 0
+					this.getQuestionList()
+				})
+			},
+			// 获取试卷详情
+			getPaperDetail() {
+				db.collection("paper").doc(this.paperId).get().then(res => {
+					let result = res.result.data[0]
+					this.questionList = result.question_list
+					this.paperTitle = result.title
+					this.selRoles = result.user_role
+				}).catch(err => {
+					alert(JSON.stringify(err))
+				})
+			},
+			// 创建试卷
+			createPaper() {
+				let errorMsg = ''
+				if (this.questionList.length <= 0)
+					errorMsg = '请填写试题'
+				if (this.selRoles.length <= 0)
+					errorMsg = '请选择角色'
+				if (!this.paperTitle)
+					errorMsg = '请填写试卷题目'
+				if (errorMsg) {
+					uni.showModal({
+						title: "提示",
+						content: errorMsg,
+						showCancel: false
+					})
+					return
+				}
+				let value = {
+					title: this.paperTitle,
+					user_role: this.selRoles,
+					question_list: this.questionList
+				}
+				db.collection("paper").add(value).then(res => {
+					// 更新question表数据
+					return db.collection('question').where({
+						status: 0
+					}).update({
+						status: 1
+					})
+				}).then(res => {
+					uni.showToast({
+						title: '新增成功'
+					})
+					this.getOpenerEventChannel().emit('refreshData')
+					setTimeout(() => uni.navigateBack(), 500)
+				}).catch((err) => {
+					uni.showModal({
+						content: err.message || '请求服务失败',
+						showCancel: false
+					})
+				}).finally(() => {
+					uni.hideLoading()
+				})
+			}
+		}
+	}
 </script>
 <style>
-.question-action {
-  margin-top: 50px;
-  position: fixed;
-  bottom: 50px;
-  right: 20px;
-}
+	.question-list {
+		border: #2C405A solid 3px;
+		border-radius: 10px;
+		padding: 20px;
+		padding-top: 0px;
+		margin: 25px;
+	}
 
-.question-content {
-  color: white;
-  background: #f0f5ff;
-  border-radius: 10px;
-  border: 1px silver solid;
-  margin-top: 30px;
-  padding: 20px;
-  width: 90%;
-}
+	.question-action {
+		margin-top: 50px;
+		position: fixed;
+		bottom: 50px;
+		right: 20px;
+	}
+
+	.question-content {
+		color: white;
+		background: #f0f5ff;
+		border-radius: 10px;
+		border: 1px silver solid;
+		margin-top: 30px;
+		padding: 20px;
+		width: 90%;
+	}
 </style>
