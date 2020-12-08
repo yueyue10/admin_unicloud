@@ -46,6 +46,10 @@
                 </button>
                 <button @click="confirmDelete(item)" class="uni-button" size="mini" type="warn">删除</button>
               </view>
+			  <view class="uni-group" v-else>
+				  <button @click="navigateTo('./edit?flag=detail&id='+item._id)" class="uni-button" size="mini" type="primary">详情
+				  </button>
+			  </view>
             </uni-td>
           </uni-tr>
         </uni-table>
@@ -63,7 +67,7 @@ const db = uniCloud.database()
 // 表查询配置
 const dbCollectionName = 'question'
 const dbOrderBy = 'create_date desc' // 排序字段
-const dbSearchFields = [] // 支持模糊搜索的字段列表
+const dbSearchFields = ["title"] // 支持模糊搜索的字段列表
 // 分页配置
 const pageSize = 10
 const pageCurrent = 1
@@ -106,11 +110,9 @@ export default {
       }
     },
     loadData(clear = true) {
-      debugger
       this.$refs.udb.loadData({
         clear
       }, () => {
-        debugger
         console.log("ssss")
       })
     },
@@ -150,6 +152,7 @@ export default {
     },
     // 多选
     selectionChange(e) {
+		debugger
       this.selectedIndexs = e.detail.index
     },
     confirmDelete(item) {

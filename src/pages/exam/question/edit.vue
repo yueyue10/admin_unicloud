@@ -1,43 +1,43 @@
 <template>
 	<view class="uni-container">
 		<!--=========================选择题逻辑===================-->
-		<uni-forms v-if="questionType==0" ref="form1" v-model="questionChoose" :rules="rules" validateTrigger="bind" @submit="submit">
+		<uni-forms v-if="questionType==0" ref="form1" v-model="questionChoose" :rules="rules" validateTrigger="bind" @submit="submit" >
 			<uni-forms-item name="title" label="问题题目">
-				<input placeholder="请输入问题题目" @input="questionChoose.title=$event.detail.value" class="uni-input-border" :value="questionChoose.title" />
+				<input :disabled="formDataFlag?true:false" placeholder="请输入问题题目" @input="questionChoose.title=$event.detail.value" class="uni-input-border" :value="questionChoose.title" />
 			</uni-forms-item>
 			<uni-forms-item name="options" label="答案选项">
 				<view class="hor-layout-center" v-for="(item,index) in questionChoose.options">
 					<text>{{item.text}}</text>
-					<input style="margin-left: 10px;width: 80%" placeholder="请输入答案项" @input="item.content=$event.detail.value" class="uni-input-border"
+					<input :disabled="formDataFlag?true:false" style="margin-left: 10px;width: 80%" placeholder="请输入答案项" @input="item.content=$event.detail.value" class="uni-input-border"
 					 :value="item.content" />
 				</view>
 			</uni-forms-item>
 			<uni-forms-item name="answer" label="问题答案">
-				<uni-data-checklist multiple :range="questionOpts" :value="questionChoose.answer" @change="questionChoose.answer=$event.detail.value"></uni-data-checklist>
+				<uni-data-checklist multiple :range="questionOpts" :value="questionChoose.answer" @change="formDataFlag?'':questionChoose.answer=$event.detail.value"></uni-data-checklist>
 			</uni-forms-item>
 			<uni-forms-item name="score" label="问题分数">
-				<input placeholder="请输入问题分数" @input="questionChoose.score=$event.detail.value" class="uni-input-border" :value="questionChoose.score"
+				<input :disabled="formDataFlag?true:false" placeholder="请输入问题分数" @input="questionChoose.score=$event.detail.value" class="uni-input-border" :value="questionChoose.score"
 				 type="number" />
 			</uni-forms-item>
 			<view class="uni-button-group">
-				<button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form1')">提交</button>
+				<button v-if="!formDataFlag" style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form1')">提交</button>
 				<navigator open-type="navigateBack" style="margin-left: 15px;"><button style="width: 100px;" class="uni-button">返回</button></navigator>
 			</view>
 		</uni-forms>
 		<!--=========================判断题逻辑===================-->
 		<uni-forms v-if="questionType==1" ref="form2" v-model="questionDecide" :rules="rules" validateTrigger="bind" @submit="submit">
 			<uni-forms-item name="title" label="问题题目">
-				<input placeholder="请输入问题题目" @input="binddata('title', $event.detail.value)" class="uni-input-border" :value="questionDecide.title" />
+				<input :disabled="formDataFlag?true:false" placeholder="请输入问题题目" @input="binddata('title', $event.detail.value)" class="uni-input-border" :value="questionDecide.title" />
 			</uni-forms-item>
 			<uni-forms-item name="decide" label="问题答案">
-				<uni-data-checklist :range="questionDecs" :value="getDecideAns" @change="changeDecideAns"></uni-data-checklist>
+				<uni-data-checklist :range="questionDecs" :value="getDecideAns" @change="formDataFlag?'':changeDecideAns"></uni-data-checklist>
 			</uni-forms-item>
 			<uni-forms-item name="score" label="问题分数">
-				<input placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border" :value="questionDecide.score"
+				<input :disabled="formDataFlag?true:false" placeholder="请输入问题分数" @input="binddata('score', $event.detail.value)" class="uni-input-border" :value="questionDecide.score"
 				 type="number" />
 			</uni-forms-item>
 			<view class="uni-button-group">
-				<button style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form2')">提交</button>
+				<button v-if="!formDataFlag" style="width: 100px;" type="primary" class="uni-button" @click="submitForm('form2')">提交</button>
 				<navigator open-type="navigateBack" style="margin-left: 15px;"><button style="width: 100px;" class="uni-button">返回</button></navigator>
 			</view>
 		</uni-forms>
@@ -121,6 +121,7 @@
 				},
 				questionType: -1,
 				formDataId: '',
+				formDataFlag: '',
 				rules: {
 					...getValidator(["title", "options", "answer", "score"])
 				}
@@ -141,6 +142,7 @@
 		onLoad(e) {
 			const id = e.id
 			this.formDataId = id
+			this.formDataFlag = e.flag || ''
 			this.getDetail(id)
 		},
 		methods: {
