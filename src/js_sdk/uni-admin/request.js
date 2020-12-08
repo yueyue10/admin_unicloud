@@ -14,6 +14,7 @@ export function request(action, data, {
 	}).then(({
 		result
 	}) => {
+		// debugger
 		if (!result) {
 			return Promise.resolve(result)
 		}

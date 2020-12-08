@@ -1,0 +1,94 @@
+{
+	"bsonType": "object",
+	"required": [],
+	"permission": {
+		"read": false,
+		"create": false,
+		"update": false,
+		"delete": false
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"index": {
+			"bsonType": "int",
+			"description": "序号",
+			"label": "序号标识"
+		},
+		"title": {
+			"bsonType": "string",
+			"component": {
+				"name": "input"
+			},
+			"description": "问题题目",
+			"label": "问题题目"
+		},
+		"options": {
+			"bsonType": "array",
+			"description": "答案选项",
+			"label": "答案选项"
+		},
+		"decide": {
+			"bsonType": "bolean",
+			"description": "判断答案",
+			"label": "判断答案"
+		},
+		"answer": {
+			"bsonType": "array",
+			"description": "问题答案",
+			"label": "问题答案"
+		},
+		"score": {
+			"bsonType": "int",
+			"component": {
+				"name": "input"
+			},
+			"description": "问题分数",
+			"label": "问题分数"
+		},
+		"status": {
+			"bsonType": "int",
+			"component": {
+				"childrenData": [{
+						"label": "编辑中",
+						"value": 0
+					},
+					{
+						"label": "已发布",
+						"value": 1
+					}
+				],
+				"name": "radio-group"
+			},
+			"defaultValue": 0,
+			"description": "状态：0 编辑中 1 已发布",
+			"title": "状态"
+		},
+		"create_date": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"type": {
+			"bsonType": "int",
+			"component": {
+				"childrenData": [{
+						"label": "选择题",
+						"value": 0
+					},
+					{
+						"label": "判断题",
+						"value": 1
+					}
+				],
+				"name": "radio-group"
+			},
+			"defaultValue": 0,
+			"description": "类型：0 选择题 1 判断题",
+			"title": "类型"
+		}
+	}
+}

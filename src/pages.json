@@ -174,6 +174,13 @@
           }
         },
         {
+          "path": "paper/edit",
+          "style": {
+            "navigationBarTitleText": "修改试卷",
+            "enablePullDownRefresh": false
+          }
+        },
+        {
           "path": "question/list",
           "style": {
             "navigationBarTitleText": "考题列表",

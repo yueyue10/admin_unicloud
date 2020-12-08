@@ -39,7 +39,7 @@
 						</uni-td>
 						<uni-td align="center">
 							<view class="uni-group">
-								<button @click="navigateTo('./add?id='+item._id)" class="uni-button" size="mini" type="primary">修改
+								<button @click="navigateTo('./edit?id='+item._id)" class="uni-button" size="mini" type="primary">修改
 								</button>
 								<button @click="confirmDelete(item)" class="uni-button" size="mini" type="warn">删除</button>
 							</view>
