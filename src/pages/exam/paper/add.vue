@@ -401,13 +401,10 @@
 					user_role: this.selRoles,
 					question_list: this.questionList
 				}
-				db.collection("paper").add(value).then(res => {
-					// 更新question表数据
-					return db.collection('question').where({
-						status: 0
-					}).update({
-						status: 1
-					})
+				this.$request('exam/paper/createPaper', {
+					paperObj: value
+				}, {
+					showModal: false
 				}).then(res => {
 					uni.showToast({
 						title: '新增成功'

@@ -9,14 +9,14 @@
 				<input class="uni-search" type="text" v-model="query" placeholder="请输入搜索内容" />
 				<button class="uni-button" type="default" size="mini" @click="search">搜索</button>
 				<button class="uni-button" type="default" size="mini" @click="navigateTo('./add')">新增</button>
-				<button class="uni-button" type="default" size="mini" @click="delTable">批量删除</button>
+				<button class="uni-button" type="default" size="mini" @click="delTable" v-if="showDeleteAll">批量删除</button>
 			</view>
 		</view>
 		<view class="uni-container">
 			<uni-clientdb ref="udb" :collection="collectionName" :options="options" :where="where" field="" page-data="replace"
 			 :orderby="orderby" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 			 v-slot:default="{data,pagination,loading,error}">
-				<uni-table :loading="loading" :emptyText="error.message || '没有更多数据'" border stripe type="selection"
+				<uni-table :loading="loading" :emptyText="error.message || '没有更多数据'" border stripe type="showDeleteAll?'selection':''"
 				 @selection-change="selectionChange">
 					<uni-tr>
 						<uni-th align="center">题目</uni-th>
@@ -38,10 +38,14 @@
 							<uni-dateformat :date="item.create_date" :threshold="[0, 0]" />
 						</uni-td>
 						<uni-td align="center">
-							<view class="uni-group">
+							<view class="uni-group" v-if="item.status==0">
 								<button @click="navigateTo('./edit?id='+item._id)" class="uni-button" size="mini" type="primary">修改
 								</button>
 								<button @click="confirmDelete(item)" class="uni-button" size="mini" type="warn">删除</button>
+								<button @click="confirmPublish(item)" class="uni-button" size="mini" type="warn">发布</button>
+							</view>
+							<view class="uni-group" v-if="item.status==1">
+								<button @click="resetPaper(item)" class="uni-button" size="mini" type="warn">撤回</button>
 							</view>
 						</uni-td>
 					</uni-tr>
@@ -64,7 +68,7 @@
 	// 分页配置
 	const pageSize = 10
 	const pageCurrent = 1
-
+	const showDeleteAll = false
 	import {
 		mapState
 	} from 'vuex'
@@ -80,7 +84,8 @@
 					pageSize,
 					pageCurrent
 				},
-				roleList: []
+				roleList: [],
+				showDeleteAll: showDeleteAll
 			}
 		},
 		computed: {
@@ -161,7 +166,86 @@
 				this.selectedIndexs = e.detail.index
 			},
 			confirmDelete(item) {
-				this.$refs.udb.remove(item._id)
+				// this.$refs.udb.remove(item._id)
+				this.$request('exam/paper/deletePaper', {
+					paperId: item._id
+				}, {
+					showModal: false
+				}).then(res => {
+					uni.showToast({
+						title: '新增成功'
+					})
+					this.search()
+				}).catch(err => {
+					uni.showModal({
+						content: err.message || '请求服务失败',
+						showCancel: false
+					})
+				}).finally(() => {
+					uni.hideLoading()
+				})
+			},
+			confirmPublish(item) {
+				uni.showModal({
+					title: '提示',
+					content: "确认发布试卷？",
+					showCancel: true,
+					success: (res) => {
+						if (res.cancel)
+							return
+						uni.showLoading({
+							title: '提交中...',
+							mask: true
+						})
+						db.collection("paper").where({
+							_id: item._id
+						}).update({
+							status: 1
+						}).then(res => {
+							uni.showToast({
+								title: "发布成功"
+							})
+							this.search()
+						}).catch(err => {
+							uni.showModal({
+								content: err.message || "请求失败"
+							})
+						}).finally(() => {
+							uni.hideLoading()
+						})
+					},
+				})
+			},
+			resetPaper(item) {
+				uni.showModal({
+					title: '提示',
+					content: "确认撤回试卷？",
+					showCancel: true,
+					success: (res) => {
+						if (res.cancel)
+							return
+						uni.showLoading({
+							title: '提交中...',
+							mask: true
+						})
+						db.collection("paper").where({
+							_id: item._id
+						}).update({
+							status: 0
+						}).then(res => {
+							uni.showToast({
+								title: "撤回成功"
+							})
+							this.search()
+						}).catch(err => {
+							uni.showModal({
+								content: err.message || "请求失败"
+							})
+						}).finally(() => {
+							uni.hideLoading()
+						})
+					},
+				})
 			},
 			getRoleList() {
 				this.$request('system/role/list', {}, {

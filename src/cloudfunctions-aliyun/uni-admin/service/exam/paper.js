@@ -72,4 +72,27 @@ module.exports = class PaperService extends Service {
 			})
 		})
 	}
+	async createPaper(paperObj) {
+		// 先添加到试卷表
+		return this.paperCt.add(paperObj).then(res => {
+			console.log("paperId", res)
+			let paperId = res.id
+			// 再更新试卷信息到question表数据
+			return this.questionCt.where({
+				status: 0
+			}).update({
+				status: 1,
+				paperId: paperId
+			})
+		})
+	}
+	async deletePaper(paperId) {
+		// 先移除试卷相关问题
+		return this.questionCt.where({
+			paperId: paperId
+		}).remove().then(res => {
+			console.log("移除问题成功")
+			return this.paperCt.doc(paperId).remove()
+		})
+	}
 }
