@@ -1,24 +1,3 @@
-# admin_unicloud
+# uni-template-admin
 
-[官网地址][admin]
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
-
-[admin]:https://uniapp.dcloud.io/uniCloud/admin
+> 基于 uni-app，uniCloud 的 admin 管理项目模板。[文档](https://uniapp.dcloud.io/uniCloud/admin)

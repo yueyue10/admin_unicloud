@@ -19,7 +19,7 @@
 </template>
 
 <script>
-	import uniMenuSidebar from '../uni-menu-sidebar/uni-menu-sidebar.vue'
+	import uniMenuSidebar from './uni-menu-sidebar.vue'
 	export default {
 		name: 'uniMenuSidebar',
 		components: {
