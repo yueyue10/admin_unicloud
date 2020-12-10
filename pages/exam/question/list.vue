@@ -16,7 +16,7 @@
 			<uni-clientdb ref="udb" :collection="collectionName" :options="options" :where="where" field="title,type,status,create_date,paperId"
 			 page-data="replace" :orderby="orderby" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 			 v-slot:default="{data,pagination,loading,error}">
-				<uni-table :loading="loading" :emptyText="error.message || '没有更多数据'" border stripe type="showDeleteAll?'selection':''"
+				<uni-table :loading="loading" :emptyText="error.message || '没有更多数据'" border stripe :type="showDeleteAll?'selection':''"
 				 @selection-change="selectionChange">
 					<uni-tr>
 						<uni-th align="center">题目</uni-th>
@@ -34,7 +34,7 @@
 						</uni-td>
 						<uni-td align="center">
 							<text class="question-status" v-if="item.status ==0">编辑中</text>
-							<text class="question-status" style="background: #ff0000;" v-if="item.status ==1">已发布</text>
+							<text class="question-status" style="background: #ff0000;" v-if="item.status ==1">已添加到试卷</text>
 						</uni-td>
 						<uni-td align="center">{{getPaperName(item.paperId)}}</uni-td>
 						<uni-td align="center">
@@ -104,11 +104,12 @@
 				let papers = paperList.filter(item => {
 					return item._id == paperId
 				})
-				return papers[0].title
+				let title = papers && papers.length > 0 && papers[0].title || ""
+				return title
 			},
 			getPaperList() {
 				db.collection("paper").field({
-					"paperId": true,
+					"_id": true,
 					"title": true
 				}).limit(100).get().then(res => {
 					// alert(JSON.stringify(res))

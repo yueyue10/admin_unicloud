@@ -16,13 +16,13 @@
 			<uni-clientdb ref="udb" :collection="collectionName" :options="options" :where="where" field="" page-data="replace"
 			 :orderby="orderby" :getcount="true" :page-size="options.pageSize" :page-current="options.pageCurrent"
 			 v-slot:default="{data,pagination,loading,error}">
-				<uni-table :loading="loading" :emptyText="error.message || '没有更多数据'" border stripe type="showDeleteAll?'selection':''"
+				<uni-table :loading="loading" :emptyText="error.message || '没有更多数据'" border stripe :type="showDeleteAll?'selection':''"
 				 @selection-change="selectionChange">
 					<uni-tr>
 						<uni-th align="center">题目</uni-th>
-						<uni-th align="center">类型</uni-th>
+						<uni-th align="center">级别</uni-th>
+						<uni-th width="170" align="center">考试时间</uni-th>
 						<uni-th align="center">状态</uni-th>
-						<uni-th width="170" align="center">创建时间</uni-th>
 						<uni-th width="204" align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
@@ -31,18 +31,27 @@
 							<text v-for="(item,index) in getRoleObjs(item.user_role)">{{item.role_name}}</text>
 						</uni-td>
 						<uni-td align="center">
-							<text class="question-status" v-if="item.status ==0">编辑中</text>
-							<text class="question-status" style="background: #ff0000;" v-if="item.status ==1">已发布</text>
+							<view class="ver-layout">
+								<view class="hor-layout">
+									<uni-dateformat :date="item.start_time" :threshold="[0, 0]" format="yyyy/MM/dd hh:mm" />
+									<text class="question-time">开始</text>
+								</view>
+								<view class="hor-layout" style="margin-top: 3px;">
+									<uni-dateformat :date="item.end_time" :threshold="[0, 0]" format="yyyy/MM/dd hh:mm" />
+									<text class="question-time">结束</text>
+								</view>
+							</view>
 						</uni-td>
 						<uni-td align="center">
-							<uni-dateformat :date="item.create_date" :threshold="[0, 0]" />
+							<text class="question-status" v-if="item.status ==0">编辑中</text>
+							<text class="question-status" style="background: #ff0000;" v-if="item.status ==1">已发布考试</text>
 						</uni-td>
 						<uni-td align="center">
 							<view class="uni-group" v-if="item.status==0">
+								<button @click="confirmPublish(item)" class="uni-button" size="mini" type="warn">发布考试</button>
 								<button @click="navigateTo('./edit?id='+item._id)" class="uni-button" size="mini" type="primary">修改
 								</button>
 								<button @click="confirmDelete(item)" class="uni-button" size="mini" type="warn">删除</button>
-								<button @click="confirmPublish(item)" class="uni-button" size="mini" type="warn">发布</button>
 							</view>
 							<view class="uni-group" v-if="item.status==1">
 								<button @click="resetPaper(item)" class="uni-button" size="mini" type="warn">撤回</button>
@@ -279,5 +288,14 @@
 	.question-status {
 		background: #55aaff;
 		color: white;
+	}
+
+	.question-time {
+		background: #55aa7f;
+		font-size: xx-small;
+		color: white;
+		padding: 1px 2px;
+		border-radius: 3px;
+		margin-left: 2px;
 	}
 </style>

@@ -18,6 +18,6 @@
     },
     "homepage": "https://github.com/dcloudio/uni-template-admin#readme",
     "dependencies": {
-		"element-ui": "^2.13.0"
-	}
+        "element-ui": "^2.13.0"
+    }
 }

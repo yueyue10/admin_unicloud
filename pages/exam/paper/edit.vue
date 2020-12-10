@@ -20,6 +20,14 @@
 				<view style="font-weight: bold;margin-right: 15px;">选择用户等级</view>
 				<uni-data-checklist multiple :range="roles" :value="selRoles" @change="formDataFlag?'':selRoles= $event.detail.value"></uni-data-checklist>
 			</view>
+			<!-- 考试时间 -->
+			<view class="hor-layout-center" style="margin-bottom: 15px;">
+				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
+				<view style="font-weight: bold;margin-right: 15px;">考试时间</view>
+				<el-date-picker disabled="true" v-model="selTime" type="datetimerange" range-separator="至" format="yyyy-MM-dd HH:mm" value-format="timestamp"
+				 start-placeholder="开始日期" end-placeholder="结束日期" align="left">
+				</el-date-picker>
+			</view>
 			<!--所有题目-->
 			<view class="question-list" v-if="questionList&&questionList.length>0">
 				<view v-for="(item,index) in questionList" :key="item._id">
@@ -220,7 +228,8 @@
 				paperId: '',
 				questionId: '',
 				formDataFlag: '',
-				roles: []
+				roles: [],
+				selTime:[]
 			}
 		},
 		computed: {
@@ -412,6 +421,10 @@
 					this.questionList = result.question_list
 					this.paperTitle = result.title
 					this.selRoles = result.user_role
+					let selTime=[]
+					selTime.push(result.start_time)
+					selTime.push(result.end_time)
+					this.selTime=selTime
 				}).catch(err => {
 					alert(JSON.stringify(err))
 				})

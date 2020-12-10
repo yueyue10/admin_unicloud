@@ -20,6 +20,14 @@
 				<view style="font-weight: bold;margin-right: 15px;">选择用户等级</view>
 				<uni-data-checklist multiple :range="roles" :value="selRoles" @change="selRoles= $event.detail.value"></uni-data-checklist>
 			</view>
+			<!-- 考试时间 -->
+			<view class="hor-layout-center" style="margin-bottom: 15px;">
+				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
+				<view style="font-weight: bold;margin-right: 15px;">考试时间</view>
+				<el-date-picker v-model="selTime" type="datetimerange" :picker-options="pickerOptions" range-separator="至" format="yyyy-MM-dd HH:mm"
+				 value-format="timestamp" start-placeholder="开始日期" end-placeholder="结束日期" align="left">
+				</el-date-picker>
+			</view>
 			<!--所有题目-->
 			<view class="question-list" v-if="questionList&&questionList.length>0">
 				<view v-for="(item,index) in questionList">
@@ -213,7 +221,27 @@
 				paperTitle: '',
 				paperId: '',
 				questionId: '',
-				roles: []
+				roles: [],
+				pickerOptions: {
+					shortcuts: [{
+						text: '最近一周',
+						onClick(picker) {
+							const end = new Date();
+							const start = new Date();
+							start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+							picker.$emit('pick', [start, end]);
+						}
+					}, {
+						text: '最近一个月',
+						onClick(picker) {
+							const end = new Date();
+							const start = new Date();
+							start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+							picker.$emit('pick', [start, end]);
+						}
+					}]
+				},
+				selTime: ''
 			}
 		},
 		computed: {
@@ -388,6 +416,8 @@
 					errorMsg = '请选择角色'
 				if (!this.paperTitle)
 					errorMsg = '请填写试卷题目'
+				if (!this.selTime)
+					errorMsg = '请选择考试时间'
 				if (errorMsg) {
 					uni.showModal({
 						title: "提示",
@@ -397,8 +427,11 @@
 					return
 				}
 				let value = {
+					status: 0,
 					title: this.paperTitle,
 					user_role: this.selRoles,
+					start_time: this.selTime[0],
+					end_time: this.selTime[1],
 					question_list: this.questionList
 				}
 				this.$request('exam/paper/createPaper', {

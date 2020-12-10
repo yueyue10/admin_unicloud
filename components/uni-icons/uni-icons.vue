@@ -58,7 +58,7 @@
 	/* #ifndef APP-NVUE */
 	@font-face {
 		font-family: uniicons;
-		src: url('components/uni-icons/uni.ttf') format('truetype');
+		src: url('./uni.ttf') format('truetype');
 	}
 
 	/* #endif */

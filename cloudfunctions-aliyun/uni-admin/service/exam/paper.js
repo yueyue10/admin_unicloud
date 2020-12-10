@@ -73,6 +73,8 @@ module.exports = class PaperService extends Service {
 		})
 	}
 	async createPaper(paperObj) {
+		paperObj.status = 0
+		paperObj.create_date = Date.now()
 		// 先添加到试卷表
 		return this.paperCt.add(paperObj).then(res => {
 			console.log("paperId", res)
