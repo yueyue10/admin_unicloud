@@ -46,6 +46,8 @@
 							</view>
 							<view class="uni-group" v-if="item.status==1">
 								<button @click="resetPaper(item)" class="uni-button" size="mini" type="warn">撤回</button>
+								<button @click="navigateTo('./edit?flag=detail&id='+item._id)" class="uni-button" size="mini" type="primary">详情
+								</button>
 							</view>
 						</uni-td>
 					</uni-tr>

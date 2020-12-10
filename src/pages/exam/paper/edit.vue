@@ -2,7 +2,7 @@
 	<view class="uni-container">
 		<view class="uni-group">
 			<view class="uni-title" style="font-weight: bolder;font-size: x-large;">
-				修改试卷
+				{{formDataFlag?'试卷详情':'修改试卷'}}
 			</view>
 			<view style="color: #dd524d">总分:{{getTotalScore}}</view>
 		</view>
@@ -11,14 +11,14 @@
 			<view class="hor-layout-center" style="margin-top: 50px;margin-bottom: 15px;">
 				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
 				<view style="font-weight: bold;margin-right: 15px;">试卷题目</view>
-				<input placeholder="请输入试卷题目" @input="paperTitle=$event.detail.value" style="width: 50%" class="uni-input-border"
-				 :value="paperTitle" />
+				<input disabled="!formDataFlag" placeholder="请输入试卷题目" @input="paperTitle=$event.detail.value" style="width: 50%"
+				 class="uni-input-border" :value="paperTitle" />
 			</view>
 			<!-- 选择角色 -->
 			<view class="hor-layout-center" style="margin-bottom: 15px;">
 				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
 				<view style="font-weight: bold;margin-right: 15px;">选择用户等级</view>
-				<uni-data-checklist multiple :range="roles" :value="selRoles" @change="selRoles= $event.detail.value"></uni-data-checklist>
+				<uni-data-checklist multiple :range="roles" :value="selRoles" @change="formDataFlag?'':selRoles= $event.detail.value"></uni-data-checklist>
 			</view>
 			<!--所有题目-->
 			<view class="question-list" v-if="questionList&&questionList.length>0">
@@ -27,8 +27,8 @@
 						{{index + 1}}、{{item.title}}
 						<text v-if="item.type==0">【选择题】</text>
 						<text v-else>【判断题】</text>
-						<uni-icons class="uni-icons-trash" style="color: #00FF00;padding: 5px;" @click="deleteQueAlert(item)"></uni-icons>
-						<uni-icons class="uni-icons-compose" style="color: #007aff;" @click="updateQuePop(item,index)"></uni-icons>
+						<uni-icons v-if="!formDataFlag" class="uni-icons-trash" style="color: #00FF00;padding: 5px;" @click="deleteQueAlert(item)"></uni-icons>
+						<uni-icons v-if="!formDataFlag" class="uni-icons-compose" style="color: #007aff;" @click="updateQuePop(item,index)"></uni-icons>
 					</view>
 					<view v-if="item.options&&item.options.length>0" class="hor-layout-center" style="margin-top: 7px;margin-left: 13px;">
 						<view v-for="(opt,idx) in item.options" style="margin: 0px 10px">
@@ -57,8 +57,8 @@
 		<view class="uni-group question-action hor-layout-side" style="width: 80%;" v-if="questionType==0">
 			<button type="warn" class="uni-button" v-if="!paperId" @click="createPaper">发布试卷</button>
 			<view class="hor-layout">
-				<button type="primary" class="uni-button" @click="addQuePop('choose_popup')">增加选择题</button>
-				<button type="primary" class="uni-button" @click="addQuePop('decide_popup')">增加判断题</button>
+				<button v-if="!formDataFlag" type="primary" class="uni-button" @click="addQuePop('choose_popup')">增加选择题</button>
+				<button v-if="!formDataFlag" type="primary" class="uni-button" @click="addQuePop('decide_popup')">增加判断题</button>
 				<navigator open-type="navigateBack" style="margin-left: 15px;">
 					<button style="width: 100px;" class="uni-button">返回</button>
 				</navigator>
@@ -219,6 +219,7 @@
 				paperTitle: '',
 				paperId: '',
 				questionId: '',
+				formDataFlag: '',
 				roles: []
 			}
 		},
@@ -243,8 +244,9 @@
 			}
 		},
 		onLoad(event) {
-			this.loadroles()
 			this.paperId = event.id
+			this.formDataFlag = event.flag
+			this.loadroles()
 			this.getPaperDetail()
 		},
 		methods: { //修改判断题答案

@@ -17,5 +17,7 @@
         "url": "https://github.com/dcloudio/uni-template-admin/issues"
     },
     "homepage": "https://github.com/dcloudio/uni-template-admin#readme",
-    "dependencies": {}
+    "dependencies": {
+		"element-ui": "^2.13.0"
+	}
 }
