@@ -56,7 +56,7 @@ module.exports = initPlugins({
 			{
 				name: 'permission',
 				enable: true,
-				ignore: ['app', 'user', 'self']
+				ignore: ['app', 'user', 'self','exam']
 			}
 		]
 	]

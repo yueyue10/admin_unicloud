@@ -24,7 +24,7 @@
 			<view class="hor-layout-center" style="margin-bottom: 15px;">
 				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
 				<view style="font-weight: bold;margin-right: 15px;">考试时间</view>
-				<el-date-picker disabled="true" v-model="selTime" type="datetimerange" range-separator="至" format="yyyy-MM-dd HH:mm" value-format="timestamp"
+				<el-date-picker :disabled="formDataFlag?true:false" v-model="selTime" type="datetimerange" range-separator="至" format="yyyy-MM-dd HH:mm" value-format="timestamp"
 				 start-placeholder="开始日期" end-placeholder="结束日期" align="left">
 				</el-date-picker>
 			</view>
@@ -35,6 +35,7 @@
 						{{index + 1}}、{{item.title}}
 						<text v-if="item.type==0">【选择题】</text>
 						<text v-else>【判断题】</text>
+						<text style="margin-left: 23px;color: #dd9883;font-weight: normal;">分数：{{item.score}}</text>
 						<uni-icons v-if="!formDataFlag" class="uni-icons-trash" style="color: #00FF00;padding: 5px;" @click="deleteQueAlert(item)"></uni-icons>
 						<uni-icons v-if="!formDataFlag" class="uni-icons-compose" style="color: #007aff;" @click="updateQuePop(item,index)"></uni-icons>
 					</view>
@@ -56,14 +57,14 @@
 							<text v-if="!item.decide">错误</text>
 						</block>
 					</view>
-					<view style="margin-top: 7px;margin-left: 23px;color: #dd524d">分数：{{item.score}}</view>
+					<!-- <view style="margin-top: 7px;margin-left: 23px;color: #dd524d">分数：{{item.score}}</view> -->
 				</view>
 			</view>
 		</view>
 
 		<!--新增题目-->
 		<view class="uni-group question-action hor-layout-side" style="width: 80%;" v-if="questionType==0">
-			<button type="warn" class="uni-button" v-if="!paperId" @click="createPaper">发布试卷</button>
+			<button v-if="!formDataFlag" type="warn" class="uni-button" @click="updatePaper">修改试卷</button>
 			<view class="hor-layout">
 				<button v-if="!formDataFlag" type="primary" class="uni-button" @click="addQuePop('choose_popup')">增加选择题</button>
 				<button v-if="!formDataFlag" type="primary" class="uni-button" @click="addQuePop('decide_popup')">增加判断题</button>
@@ -449,14 +450,16 @@
 				let value = {
 					title: this.paperTitle,
 					user_role: this.selRoles,
-					question_list: this.questionList
+					start_time: this.selTime[0],
+					end_time: this.selTime[1]
 				}
 				// 更新paper表数据
 				db.collection("paper").doc(this.paperId).update(value).then(res => {
 					uni.showToast({
 						title: '更新成功'
 					})
-					this.getPaperDetail()
+					this.getOpenerEventChannel().emit('refreshData')
+					setTimeout(() => uni.navigateBack(), 500)
 				}).catch((err) => {
 					uni.showModal({
 						content: err.message || '请求服务失败',

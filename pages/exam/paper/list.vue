@@ -45,6 +45,7 @@
 						<uni-td align="center">
 							<text class="question-status" v-if="item.status ==0">编辑中</text>
 							<text class="question-status" style="background: #ff0000;" v-if="item.status ==1">已发布考试</text>
+							<text class="question-status" style="background: #8c8c8c;" v-if="item.status ==2">考试已结束</text>
 						</uni-td>
 						<uni-td align="center">
 							<view class="uni-group" v-if="item.status==0">
@@ -55,6 +56,10 @@
 							</view>
 							<view class="uni-group" v-if="item.status==1">
 								<button @click="resetPaper(item)" class="uni-button" size="mini" type="warn">撤回</button>
+								<button @click="navigateTo('./edit?flag=detail&id='+item._id)" class="uni-button" size="mini" type="primary">详情
+								</button>
+							</view>
+							<view class="uni-group" v-if="item.status==2">
 								<button @click="navigateTo('./edit?flag=detail&id='+item._id)" class="uni-button" size="mini" type="primary">详情
 								</button>
 							</view>
@@ -105,7 +110,21 @@
 		onLoad() {
 			this.getRoleList()
 		},
+		onShow() {
+			this.refreshPaperStatus()
+		},
 		methods: {
+			refreshPaperStatus() {
+				this.$request('exam/paper/refreshPaper', {}, {
+					showModal: false
+				}).then(res => {
+					// alert(JSON.stringify(res))
+					if (res.updated)
+						this.loadData()
+				}).catch(err => {
+					this.errMsg = err.message
+				})
+			},
 			getRoleObjs(role_ids) {
 				let roleList = this.roleList
 				let roleObjs = roleList.filter(item => {

@@ -35,6 +35,7 @@
 						{{index + 1}}、{{item.title}}
 						<text v-if="item.type==0">【选择题】</text>
 						<text v-else>【判断题】</text>
+						<text style="margin-left: 5px;margin-right: 10px;color: #dd9883;font-weight: normal;">分数:{{item.score}}</text>
 						<uni-icons class="uni-icons-trash" style="color: #00FF00;padding: 5px;" @click="deleteQuestion(item._id)"></uni-icons>
 						<uni-icons class="uni-icons-compose" style="color: #007aff;" @click="updateQuePop(item)"></uni-icons>
 					</view>
@@ -56,7 +57,7 @@
 							<text v-if="!item.decide">错误</text>
 						</block>
 					</view>
-					<view style="margin-top: 7px;margin-left: 23px;color: #dd524d">分数：{{item.score}}</view>
+					<!-- <view style="margin-top: 7px;margin-left: 23px;color: #dd524d">分数：{{item.score}}</view> -->
 				</view>
 			</view>
 		</view>

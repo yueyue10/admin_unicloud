@@ -65,13 +65,6 @@
 			"description": "状态：0 编辑中 1 已发布",
 			"title": "状态"
 		},
-		"create_date": {
-			"bsonType": "timestamp",
-			"description": "创建时间",
-			"forceDefaultValue": {
-				"$env": "now"
-			}
-		},
 		"type": {
 			"bsonType": "int",
 			"component": {
@@ -89,6 +82,18 @@
 			"defaultValue": 0,
 			"description": "类型：0 选择题 1 判断题",
 			"title": "类型"
+		},
+		"create_date": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"paperId": {
+			"bsonType": "string",
+			"description": "关联的试卷id",
+			"foreignKey": "paper._id"
 		}
 	}
 }

@@ -41,4 +41,7 @@ module.exports = class PaperController extends Controller {
 		} = this.ctx.data
 		return this.paperServie.deletePaper(paperId)
 	}
+	async refreshPaper() {
+		return this.paperServie.refreshPaper()
+	}
 }

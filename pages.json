@@ -147,12 +147,6 @@
           }
         },
         {
-          "path": "exam/add",
-          "style": {
-            "navigationBarTitleText": "新增考试",
-            "enablePullDownRefresh": false
-          }
-        },{
           "path": "exam/edit",
           "style": {
             "navigationBarTitleText": "修改考试",

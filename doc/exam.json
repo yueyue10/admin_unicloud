@@ -1,0 +1,55 @@
+{
+	"bsonType": "object",
+	"required": [],
+	"permission": {
+		"read": false,
+		"create": false,
+		"update": false,
+		"delete": false
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"title": {
+			"bsonType": "string",
+			"description": "考题题目"
+		},
+		"user_role": {
+			"bsonType": "array",
+			"description": "用户角色"
+		},
+		"start_time": {
+			"bsonType": "number",
+			"description": "考试开始时间"
+		},
+		"end_time": {
+			"bsonType": "number",
+			"description": "考试结束时间"
+		},
+		"question_list": {
+			"bsonType": "array",
+			"description": "考试题目列表"
+		},
+		"create_date": {
+			"bsonType": "number",
+			"description": "创建时间"
+		},
+		"paperId": {
+			"bsonType": "string",
+			"description": "考题id"
+		},
+		"userId": {
+			"bsonType": "string",
+			"description": "用户id"
+		},
+		"uTotalScore": {
+			"bsonType": "number",
+			"description": "用户考试分数"
+		},
+		"status": {
+			"bsonType": "number",
+			"description": "考题状态"
+		}
+	}
+}

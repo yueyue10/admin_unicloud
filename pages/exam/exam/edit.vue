@@ -1,192 +1,259 @@
 <template>
-  <view class="uni-container">
-    <uni-forms ref="form" v-model="formData" :rules="rules" validateTrigger="bind" @submit="submit">
-      <uni-forms-item name="username" label="用户名">
-        <input placeholder="请输入用户名" @input="binddata('username', $event.detail.value)" class="uni-input-border"
-               :value="formData.username"/>
-      </uni-forms-item>
-      <!-- <uni-forms-item name="password" label="初始密码">
-        <input placeholder="请输入初始密码" @input="binddata('password', $event.detail.value)" class="uni-input-border" :value="formData.password" />
-      </uni-forms-item> -->
-      <uni-forms-item name="role" label="角色列表">
-        <uni-data-checklist multiple v-if="roles.length" :value="formData.role" :range="roles"
-                            @change="binddata('role', $event.detail.value)"></uni-data-checklist>
-        <view v-else class="uni-form-item-empty">
-          暂无
-        </view>
-      </uni-forms-item>
-      <uni-forms-item name="mobile" label="手机号">
-        <input placeholder="手机号" @input="binddata('mobile', $event.detail.value)" class="uni-input-border"
-               :value="formData.mobile"/>
-      </uni-forms-item>
-      <uni-forms-item name="email" label="邮箱">
-        <input placeholder="邮箱" @input="binddata('email', $event.detail.value)" class="uni-input-border"
-               :value="formData.email"/>
-      </uni-forms-item>
-      <uni-forms-item name="status" label="是否启用">
-        <switch v-if="typeof formData.status === 'boolean'" @change="binddata('status', $event.detail.value)"
-                :checked="formData.status"/>
-        <view v-else class="uni-form-item-empty">{{formData.status}}</view>
-      </uni-forms-item>
-      <view class="uni-button-group">
-        <button style="width: 100px;" type="primary" class="uni-button" @click="submitForm">提交</button>
-        <navigator open-type="navigateBack" style="margin-left: 15px;">
-          <button style="width: 100px;" class="uni-button">返回</button>
-        </navigator>
-      </view>
-    </uni-forms>
-  </view>
+	<view class="uni-container">
+		<view class="uni-group">
+			<view class="uni-title" style="font-weight: bolder;font-size: x-large;">
+				考试详情
+			</view>
+			<view style="color: #dd524d">总分:{{getTotalScore[0]}}</view>
+			<view style="margin-left: 15px;color: #007AFF">得分:{{getTotalScore[1]}}</view>
+		</view>
+		<view class="uni-container">
+			<!-- 试卷题目 -->
+			<view class="hor-layout-center" style="margin-top: 50px;margin-bottom: 15px;">
+				<view style="font-weight: bold;margin-right: 15px;">试卷题目</view>
+				<input disabled placeholder="请输入试卷题目" style="width: 50%" :value="paperTitle" />
+			</view>
+			<!-- 选择角色 -->
+			<view class="hor-layout-center" style="margin-bottom: 15px;">
+				<view style="font-weight: bold;margin-right: 15px;">用户等级</view>
+				<label v-for="(opt,ind) in selRoles">
+					{{opt.role_name}}.
+					<checkbox checked disabled color="#FFCC33" style="transform:scale(0.7)" />
+				</label>
+			</view>
+			<!-- 试卷时间 -->
+			<view class="hor-layout-center" style="margin-bottom: 15px;">
+				<view style="font-weight: bold;margin-right: 15px;">试卷时间</view>
+				<el-date-picker disabled v-model="selTime" type="datetimerange" range-separator="至" format="yyyy-MM-dd HH:mm"
+				 value-format="timestamp" start-placeholder="开始日期" end-placeholder="结束日期" align="left">
+				</el-date-picker>
+			</view>
+			<!-- 答题时间 -->
+			<view class="hor-layout-center" style="margin-bottom: 15px;">
+				<view style="font-weight: bold;margin-right: 15px;">答题时间</view>
+				<el-date-picker disabled v-model="examInfo.create_date" type="datetime" range-separator="至" format="yyyy-MM-dd HH:mm"
+				 value-format="timestamp" align="left">
+				</el-date-picker>
+			</view>
+			<!--所有题目-->
+			<view class="question-list" v-if="questionList&&questionList.length>0">
+				<view v-for="(item,index) in questionList" :key="item._id">
+					<view style="font-weight: bolder;margin-top: 20px">
+						{{index + 1}}、{{item.title}}
+						<text v-if="item.type==0">【选择题】</text>
+						<text v-else>【判断题】</text>
+						<text style="margin-left: 23px;color: #dd9883;font-weight: normal;">分数：{{item.score}}</text>
+					</view>
+					<view v-if="item.options&&item.options.length>0" class="hor-layout-center" style="margin-top: 7px;margin-left: 13px;">
+						<view v-for="(opt,idx) in item.options" style="margin: 0px 10px">
+							<text style="color: #8e8ed3">{{opt.text}}.</text>
+							<text>{{opt.content}}</text>
+						</view>
+					</view>
+					<view class="hor-layout-center" style="margin-top: 7px;margin-left: 23px;">
+						<view style="color: #0055ff;">
+							<text style="color: #000000;">正确答案：</text>
+							<block v-if="item.type==0">
+								<text v-for="(ans,idx) in item.answer">
+									{{idx==0?'':'、'}}{{ans}}
+								</text>
+							</block>
+							<block v-else>
+								<text v-if="item.decide">正确</text>
+								<text v-if="!item.decide">错误</text>
+							</block>
+						</view>
+						<view style="margin-left: 20px;color: #aa00ff;">
+							<text style="color: #000000;">用户答案：</text>
+							<block v-if="item.type==0">
+								<text v-for="(ans,idx) in item.uAnswer">
+									{{idx==0?'':'、'}}{{ans}}
+								</text>
+							</block>
+							<block v-else>
+								<text v-if="item.uDecide=='true'">正确</text>
+								<text v-else>错误</text>
+							</block>
+						</view>
+					</view>
+					<view style="margin-top: 7px;margin-left: 23px;color: #dd0e06;font-weight: bold">得分：{{item.uScore}}</view>
+				</view>
+			</view>
+		</view>
+		<view class="uni-button-group" style="position: fixed;bottom: 20px;left: 50%;">
+			<button style="width: 100px;" type="default" class="uni-button" @click="backClick">返回</button>
+		</view>
+	</view>
 </template>
 
 <script>
-import validator from '@/js_sdk/validator/uni-id-users.js';
+	import validator from '@/js_sdk/validator/question.js';
+	import UniIcons from "@/components/uni-icons/uni-icons";
 
-const db = uniCloud.database();
-const dbCmd = db.command;
-const dbCollectionName = 'uni-id-users';
+	const db = uniCloud.database();
+	const dbCmd = db.command;
 
-function getValidator(fields) {
-  let reuslt = {}
-  for (let key in validator) {
-    if (fields.includes(key)) {
-      reuslt[key] = validator[key]
-    }
-  }
-  return reuslt
-}
+	function getValidator(fields) {
+		let reuslt = {}
+		for (let key in validator) {
+			if (fields.includes(key)) {
+				reuslt[key] = validator[key]
+			}
+		}
+		return reuslt
+	}
 
-export default {
-  data() {
-    return {
-      formData: {
-        "username": "",
-        "password": "",
-        "role": [],
-        "mobile": "",
-        "email": "",
-        "status": false //默认开启
-      },
-      rules: {
-        ...getValidator(["username", "password", "role", "mobile", "email"])
-      },
-      roles: []
-    }
-  },
-  onLoad(e) {
-    const id = e.id
-    this.formDataId = id
-    this.getDetail(id)
-    this.loadroles()
-
-  },
-  methods: {
-    /**
-     * 触发表单提交
-     */
-    submitForm(form) {
-      this.$refs.form.submit();
-    },
-
-    /**
-     * 表单提交
-     * @param {Object} event 回调参数 Function(callback:{value,errors})
-     */
-    submit(event) {
-      const {
-        value,
-        errors
-      } = event.detail
-
-      // 表单校验失败页面会提示报错 ，要停止表单提交逻辑
-      if (errors) {
-        return
-      }
-      uni.showLoading({
-        title: '修改中...',
-        mask: true
-      })
-
-      // 是否启用功能的数据类型转换， 0 正常， 1 禁用
-      if (typeof value.status === "boolean") {
-        value.status = Number(!value.status)
-      }
-      // 使用 uni-clientDB 提交数据
-      db.collection(dbCollectionName).where({
-        _id: this.formDataId
-      }).update(value).then((res) => {
-        uni.showToast({
-          title: '修改成功'
-        })
-        this.getOpenerEventChannel().emit('refreshData')
-        setTimeout(() => uni.navigateBack(), 500)
-      }).catch((err) => {
-        uni.showModal({
-          content: err.message || '请求服务失败',
-          showCancel: false
-        })
-      }).finally(() => {
-        uni.hideLoading()
-      })
-    },
-
-    /**
-     * 获取表单数据
-     * @param {Object} id
-     */
-    getDetail(id) {
-      uni.showLoading({
-        mask: true
-      })
-      db.collection(dbCollectionName).where({
-        _id: id
-      }).get().then((res) => {
-        const data = res.result.data[0]
-        if (data) {
-          // Object.keys(this.formData).forEach(name => {
-          // 	this.binddata(name, data[name])
-          // })
-          const status = data.status
-          if (status < 2) {
-            data.status = !status
-            this.formData = data
-          } else if (status === 2) {
-            this.formData.status = '审核中'
-          } else if (status === 3) {
-            this.formData.status = '审核拒绝'
-          } else {
-            this.formData.status = '未知状态'
-          }
-
-        }
-      }).catch((err) => {
-        uni.showModal({
-          content: err.message || '请求服务失败',
-          showCancel: false
-        })
-      }).finally(() => {
-        uni.hideLoading()
-      })
-    },
-    loadroles() {
-      db.collection('uni-id-roles').limit(500).get().then(res => {
-        this.roles = res.result.data.map(item => {
-          return {
-            value: item.role_id,
-            text: item.role_name
-          }
-        })
-        this.roles.unshift({
-          value: 'admin',
-          text: 'admin'
-        })
-      }).catch(err => {
-        uni.showModal({
-          title: '提示',
-          content: err.message,
-          showCancel: false
-        })
-      })
-    }
-  }
-}
+	export default {
+		components: {
+			UniIcons
+		},
+		data() {
+			return {
+				questionDecs: [{
+						"text": "正确",
+						"value": '正确',
+						"decide": true
+					},
+					{
+						"text": "错误",
+						"value": '错误',
+						"decide": false
+					}
+				],
+				questionOpts: [{
+						"text": "A",
+						"value": 'A'
+					},
+					{
+						"text": "B",
+						"value": "B"
+					},
+					{
+						"text": "C",
+						"value": "C"
+					},
+					{
+						"text": "D",
+						"value": "D"
+					}
+				],
+				questionList: [],
+				questionType: 0,
+				questionChoose: {
+					"index": 0,
+					"title": "",
+					"options": [{
+							"text": "A",
+							"content": ''
+						},
+						{
+							"text": "B",
+							"content": ""
+						},
+						{
+							"text": "C",
+							"content": ""
+						},
+						{
+							"text": "D",
+							"content": ""
+						}
+					],
+					"answer": [],
+					"score": 1
+				},
+				questionDecide: {
+					"index": 0,
+					"title": "",
+					"decide": true,
+					"score": 1
+				},
+				rules: {
+					...getValidator(["title", "options", "answer", "score"])
+				},
+				selRoles: [],
+				paperTitle: '',
+				paperId: '',
+				questionId: '',
+				formDataFlag: '',
+				roles: [],
+				selTime: [],
+				examInfo: {}
+			}
+		},
+		computed: {
+			getDecideAns() {
+				let decide = this.questionDecide.decide
+				let questionDecs = this.questionDecs
+				let queDesValue = ''
+				questionDecs.forEach(que => {
+					if (que.decide == decide)
+						queDesValue = que.value
+				})
+				return queDesValue
+			},
+			getTotalScore() {
+				let questionList = this.questionList
+				let totalScore = 0
+				let uTotalScore = 0
+				questionList.forEach(que => {
+					totalScore = totalScore + que.score
+					uTotalScore = uTotalScore + que.uScore
+				})
+				return [totalScore, uTotalScore]
+			}
+		},
+		onLoad(event) {
+			this.examId = event.id
+			this.getExamDetail()
+		},
+		methods: {
+			// 获取考试详情
+			getExamDetail() {
+				db.collection('exam,uni-id-users,uni-id-roles').doc(this.examId).field(
+					'title,userId{username},user_role{role_name},start_time,end_time,question_list,create_date,paperId,userId,uTotalScore'
+				).get().then(res => {
+					let result = res.result.data[0]
+					console.log(result)
+					this.examInfo = result
+					this.questionList = result.question_list
+					this.paperTitle = result.title
+					this.selRoles = result.user_role
+					let selTime = []
+					selTime.push(result.start_time)
+					selTime.push(result.end_time)
+					this.selTime = selTime
+				})
+			},
+			backClick() {
+				uni.navigateBack({})
+			}
+		}
+	}
 </script>
+<style>
+	.question-list {
+		border: #2C405A solid 3px;
+		border-radius: 10px;
+		padding: 20px;
+		padding-top: 0px;
+		margin: 25px;
+	}
+
+	.question-action {
+		margin-top: 50px;
+		position: fixed;
+		bottom: 50px;
+		right: 20px;
+	}
+
+	.question-content {
+		color: white;
+		background: #f0f5ff;
+		border-radius: 10px;
+		border: 1px silver solid;
+		margin-top: 30px;
+		padding: 20px;
+		width: 90%;
+	}
+</style>

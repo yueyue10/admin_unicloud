@@ -72,9 +72,15 @@ module.exports = class PaperService extends Service {
 			})
 		})
 	}
+
 	async createPaper(paperObj) {
 		paperObj.status = 0
 		paperObj.create_date = Date.now()
+		let totalScore = 0;
+		paperObj.question_list.forEach(item => {
+			totalScore += item.score
+		})
+		paperObj.totalScore = totalScore
 		// 先添加到试卷表
 		return this.paperCt.add(paperObj).then(res => {
 			console.log("paperId", res)
@@ -88,6 +94,18 @@ module.exports = class PaperService extends Service {
 			})
 		})
 	}
+
+	async refreshPaper() {
+		let cur_date = Date.now()
+		return this.paperCt.where({
+			status: 1,
+			start_time: this.dbCmd.lt(cur_date),
+			end_time: this.dbCmd.lt(cur_date)
+		}).update({
+			status: 2
+		})
+	}
+
 	async deletePaper(paperId) {
 		// 先移除试卷相关问题
 		return this.questionCt.where({

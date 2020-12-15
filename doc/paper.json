@@ -15,13 +15,30 @@
 			"bsonType": "string",
 			"description": "试卷名称"
 		},
+		"status": {
+			"bsonType": "number",
+			"description": "0.未发布 1.已发布"
+		},
 		"user_role": {
 			"bsonType": "array",
-			"description": "用户角色"
+			"description": "用户角色",
+			"foreignKey": "uni-id-roles.role_id"
+		},
+		"start_time": {
+			"bsonType": "timestamp",
+			"description": "开始时间"
+		},
+		"end_time": {
+			"bsonType": "timestamp",
+			"description": "结束时间"
 		},
 		"question_list": {
 			"bsonType": "array",
 			"description": "试题列表"
+		},
+		"totalScore": {
+			"bsonType": "number",
+			"description": "试题分数"
 		},
 		"create_date": {
 			"bsonType": "timestamp",
