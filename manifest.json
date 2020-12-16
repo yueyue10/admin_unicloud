@@ -76,6 +76,11 @@
         "enable" : false
     },
     "h5" : {
-        "template" : "template.h5.html"
+        "template" : "template.h5.html",
+        "router" : {
+            "mode" : "hash",
+            "base" : "/exam_admin/"
+        },
+        "domain" : "m.zhaoyj.work"
     }
 }
