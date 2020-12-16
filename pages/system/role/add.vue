@@ -1,18 +1,18 @@
 <template>
 	<view class="uni-container">
 		<uni-forms ref="form" v-model="formData" :rules="rules" validateTrigger="bind" @submit="submit">
-			<uni-forms-item name="role_id" label="角色id">
-				<input placeholder="请输入姓名" @input="binddata('role_id', $event.detail.value)" class="uni-input-border" :value="formData.role_id" />
+			<!-- <uni-forms-item name="role_id" label="职称id">
+				<input placeholder="请输入职称Id" @input="binddata('role_id', $event.detail.value)" class="uni-input-border" :value="formData.role_id" />
+			</uni-forms-item> -->
+			<uni-forms-item name="role_name" label="职称名">
+				<input placeholder="请输入职称名" @input="binddata('role_name', $event.detail.value)" class="uni-input-border" :value="formData.role_name" />
 			</uni-forms-item>
-			<uni-forms-item name="role_name" label="角色名">
-				<input placeholder="请输入角色名" @input="binddata('role_name', $event.detail.value)" class="uni-input-border" :value="formData.role_name" />
-			</uni-forms-item>
-			<uni-forms-item name="permission" label="权限列表">
+			<!-- <uni-forms-item name="permission" label="权限列表">
 				<uni-data-checklist v-if="permissions.length" multiple :range="permissions" @change="binddata('permission', $event.detail.value)"></uni-data-checklist>
 				<view v-else class="uni-form-item-empty">
 					暂无
 				</view>
-			</uni-forms-item>
+			</uni-forms-item> -->
 			<uni-forms-item name="comment" label="备注">
 				<textarea placeholder="请输入备注" @input="binddata('comment', $event.detail.value)" class="uni-textarea-border" :value="formData.comment"></textarea>
 			</uni-forms-item>
@@ -27,7 +27,9 @@
 
 <script>
 	import validator from '@/js_sdk/validator/uni-id-roles.js';
-
+	import {
+		getFullTime
+	} from '../../../common/comm.js'
 	const db = uniCloud.database();
 	const dbCmd = db.command;
 	const dbCollectionName = 'uni-id-roles';
@@ -77,7 +79,8 @@
 					value,
 					errors
 				} = event.detail
-
+				value.role_id = getFullTime()
+				value.permission = []
 				// 表单校验失败页面会提示报错 ，要停止表单提交逻辑
 				if (errors) {
 					return

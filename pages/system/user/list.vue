@@ -22,7 +22,7 @@ register_date"
 					<uni-tr>
 						<uni-th align="center">用户名</uni-th>
 						<!-- <uni-th align="center">初始密码</uni-th> -->
-						<uni-th align="center">角色</uni-th>
+						<uni-th align="center">职称</uni-th>
 						<uni-th align="center">手机号</uni-th>
 						<uni-th align="center">邮箱</uni-th>
 						<uni-th align="center">用户状态</uni-th>

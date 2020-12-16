@@ -56,7 +56,7 @@ const db = uniCloud.database()
 // 表查询配置
 const dbCollectionName = 'exam,uni-id-users'
 const dbOrderBy = 'create_date desc' // 排序字段
-const dbSearchFields = [] // 支持模糊搜索的字段列表
+const dbSearchFields = ['title','userId.username'] // 支持模糊搜索的字段列表
 // 分页配置
 const pageSize = 10
 const pageCurrent = 1
@@ -97,16 +97,15 @@ export default {
       const newWhere = this.getWhere()
       const isSameWhere = newWhere === this.where
       this.where = newWhere
+	  // alert(JSON.stringify(newWhere))
       if (isSameWhere) { // 相同条件时，手动强制刷新
         this.loadData()
       }
     },
     loadData(clear = true) {
-      debugger
       this.$refs.udb.loadData({
         clear
       }, () => {
-        debugger
         console.log("ssss")
       })
     },

@@ -20,7 +20,7 @@
 				 @selection-change="selectionChange">
 					<uni-tr>
 						<uni-th align="center">题目</uni-th>
-						<uni-th align="center">级别</uni-th>
+						<uni-th align="center">职称</uni-th>
 						<uni-th width="170" align="center">考试时间</uni-th>
 						<uni-th align="center">状态</uni-th>
 						<uni-th width="204" align="center">操作</uni-th>

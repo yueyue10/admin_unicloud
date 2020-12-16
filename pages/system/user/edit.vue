@@ -7,7 +7,7 @@
 			<!-- <uni-forms-item name="password" label="初始密码">
 				<input placeholder="请输入初始密码" @input="binddata('password', $event.detail.value)" class="uni-input-border" :value="formData.password" />
 			</uni-forms-item> -->
-			<uni-forms-item name="role" label="角色列表">
+			<uni-forms-item name="role" label="职称列表">
 				<uni-data-checklist multiple v-if="roles.length" :value="formData.role" :range="roles" @change="binddata('role', $event.detail.value)"></uni-data-checklist>
 				<view v-else class="uni-form-item-empty">
 					暂无
@@ -168,10 +168,10 @@
 							text: item.role_name
 						}
 					})
-					this.roles.unshift({
-						value: 'admin',
-						text: 'admin'
-					})
+					// this.roles.unshift({
+					// 	value: 'admin',
+					// 	text: 'admin'
+					// })
 				}).catch(err => {
 					uni.showModal({
 						title: '提示',

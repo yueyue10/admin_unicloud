@@ -18,7 +18,7 @@
 		</view>
 		<view v-show="currentTab==='menus'">
 			<view class="uni-header" style="border-bottom: 0;margin-bottom: -15px;">
-				<view class="uni-group">
+				<view class="uni-group" style="display: none;">
 					<button @click="navigateTo('./add')" size="mini" type="primary">新增</button>
 				</view>
 				<view class="uni-group">
@@ -42,7 +42,7 @@
 						<uni-td>{{item.url}}</uni-td>
 						<uni-td align="center" :class="{'menu-disable':!item.enable}">{{item.enable?'已启用':'未启用'}}</uni-td>
 						<uni-td align="center">
-							<view class="uni-group">
+							<view class="uni-group" style="display: none;">
 								<button @click="navigateTo('./edit?id='+item._id)" class="uni-button" size="mini" type="primary">修改</button>
 								<button :style="{visibility:item.menu_id==='system_menu'||item.menu_id==='system_management'?'hidden':'initial'}"
 								 @click="confirmDelete(item)" class="uni-button" size="mini" type="warn">删除</button>

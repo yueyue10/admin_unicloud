@@ -1,19 +1,19 @@
 <template>
 	<view class="uni-container">
 		<uni-forms ref="form" v-model="formData" :rules="rules" validateTrigger="bind" @submit="submit">
-			<uni-forms-item name="role_id" label="角色Id">
-				<input disabled placeholder="请输入姓名" @input="binddata('role_id', $event.detail.value)" class="uni-input-border uni-disabled"
+			<uni-forms-item name="role_id" label="职称Id">
+				<input disabled placeholder="请输入职称Id" @input="binddata('role_id', $event.detail.value)" class="uni-input-border uni-disabled"
 				 :value="formData.role_id" />
 			</uni-forms-item>
-			<uni-forms-item name="role_name" label="角色名">
-				<input placeholder="请输入角色名" @input="binddata('role_name', $event.detail.value)" class="uni-input-border" :value="formData.role_name" />
+			<uni-forms-item name="role_name" label="职称名">
+				<input placeholder="请输入职称名" @input="binddata('role_name', $event.detail.value)" class="uni-input-border" :value="formData.role_name" />
 			</uni-forms-item>
-			<uni-forms-item name="permission" label="权限列表">
+			<!-- <uni-forms-item name="permission" label="权限列表">
 				<uni-data-checklist multiple v-if="permissions.length" :value="formData.permission" :range="permissions" @change="binddata('permission', $event.detail.value)"></uni-data-checklist>
 				<view v-else class="uni-form-item-empty">
 					暂无
 				</view>
-			</uni-forms-item>
+			</uni-forms-item> -->
 			<uni-forms-item name="comment" label="备注">
 				<textarea placeholder="请输入备注" @input="binddata('comment', $event.detail.value)" class="uni-textarea-border" :value="formData.comment"></textarea>
 			</uni-forms-item>

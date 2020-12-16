@@ -17,7 +17,7 @@
 			<!-- 选择角色 -->
 			<view class="hor-layout-center" style="margin-bottom: 15px;">
 				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
-				<view style="font-weight: bold;margin-right: 15px;">选择用户等级</view>
+				<view style="font-weight: bold;margin-right: 15px;">考生职称</view>
 				<uni-data-checklist multiple :range="roles" :value="selRoles" @change="selRoles= $event.detail.value"></uni-data-checklist>
 			</view>
 			<!-- 考试时间 -->
@@ -462,10 +462,10 @@
 							text: item.role_name
 						}
 					})
-					this.roles.unshift({
-						value: 'admin',
-						text: 'admin'
-					})
+					// this.roles.unshift({
+					// 	value: 'admin',
+					// 	text: 'admin'
+					// })
 				}).catch(err => {
 					uni.showModal({
 						title: '提示',

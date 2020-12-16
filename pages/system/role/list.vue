@@ -18,17 +18,17 @@
 				<uni-table :loading="loading" :emptyText="error.message || '没有更多数据'" border stripe type="selection"
 				 @selection-change="selectionChange">
 					<uni-tr>
-						<uni-th align="center">角色Id</uni-th>
-						<uni-th align="center">角色名</uni-th>
-						<uni-th align="center">权限</uni-th>
+						<!-- <uni-th align="center">角色Id</uni-th> -->
+						<uni-th align="center">职称</uni-th>
+						<!-- <uni-th align="center">权限</uni-th> -->
 						<uni-th align="center">备注</uni-th>
 						<uni-th width="170" align="center">创建时间</uni-th>
 						<uni-th width="204" align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item,index) in data" :key="index">
-						<uni-td align="center">{{item.role_id}}</uni-td>
+						<!-- <uni-td align="center">{{item.role_id}}</uni-td> -->
 						<uni-td align="center">{{item.role_name}}</uni-td>
-						<uni-td align="center">{{item.permission ? item.permission.map(pItem => pItem.permission_name).join('、') : '-'}}</uni-td>
+						<!-- <uni-td align="center">{{item.permission ? item.permission.map(pItem => pItem.permission_name).join('、') : '-'}}</uni-td> -->
 						<uni-td align="center">{{item.comment}}</uni-td>
 						<uni-td align="center">
 						    <uni-dateformat :date="item.create_date" :threshold="[0, 0]" />

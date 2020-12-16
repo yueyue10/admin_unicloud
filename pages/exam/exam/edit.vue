@@ -15,7 +15,7 @@
 			</view>
 			<!-- 选择角色 -->
 			<view class="hor-layout-center" style="margin-bottom: 15px;">
-				<view style="font-weight: bold;margin-right: 15px;">用户等级</view>
+				<view style="font-weight: bold;margin-right: 15px;">考生职称</view>
 				<label v-for="(opt,ind) in selRoles">
 					{{opt.role_name}}.
 					<checkbox checked disabled color="#FFCC33" style="transform:scale(0.7)" />
