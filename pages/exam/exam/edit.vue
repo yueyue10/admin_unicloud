@@ -4,8 +4,8 @@
 			<view class="uni-title" style="font-weight: bolder;font-size: x-large;">
 				考试详情
 			</view>
-			<view style="color: #dd524d">总分:{{getTotalScore[0]}}</view>
-			<view style="margin-left: 15px;color: #007AFF">得分:{{getTotalScore[1]}}</view>
+			<view style="color: #dd9883">总分:{{getTotalScore[0]}}</view>
+			<view style="margin-left: 15px;color: #dd0e06;font-weight: bold;">得分:{{getTotalScore[1]}}</view>
 		</view>
 		<view class="uni-container">
 			<!-- 试卷题目 -->
@@ -76,7 +76,7 @@
 							</block>
 						</view>
 					</view>
-					<view style="margin-top: 7px;margin-left: 23px;color: #dd0e06;font-weight: bold">得分：{{item.uScore}}</view>
+					<view style="margin-top: 7px;margin-left: 23px;color: #dd0e06;">得分：{{item.uScore}}</view>
 				</view>
 			</view>
 		</view>

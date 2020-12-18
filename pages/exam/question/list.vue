@@ -71,7 +71,7 @@
 	// 分页配置
 	const pageSize = 10
 	const pageCurrent = 1
-	const showDeleteAll = false
+	const showDeleteAll = true
 
 	import {
 		mapState

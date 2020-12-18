@@ -1,0 +1,9 @@
+// 本文件中的json内容将在云函数【运行】时作为参数传给云函数。
+// 配置教程参考：https://uniapp.dcloud.net.cn/uniCloud/quickstart?id=runparam
+{
+	"action": "exam/exam/getExamSort",
+	"data": {
+		"date": "202012"
+	},
+	"uniIdToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI1ZmMwYWFjZjI1YTEwMTAwMDEwNjQ5NzUiLCJuZWVkUGVybWlzc2lvbiI6dHJ1ZSwiaWF0IjoxNjA4MjU1OTk4LCJleHAiOjE2MDgyNjY3OTh9.i9Cr3qjV7FH0k7F9WGRhijZYzpm0QvlsRRznZMpV_Ic"
+}

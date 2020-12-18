@@ -11,3 +11,11 @@ export function getFullTime() {
 	console.log(dateStr)
 	return dateStr
 }
+// 年月
+export function getCurYearMonth() {
+	var date = new Date(),
+		Y = date.getFullYear() + '',
+		M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1);
+	let yearMonth = Y + M;
+	return yearMonth;
+}

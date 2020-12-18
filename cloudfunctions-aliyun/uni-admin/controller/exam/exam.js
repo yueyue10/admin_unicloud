@@ -12,4 +12,10 @@ module.exports = class ExamController extends Controller {
 		} = this.ctx.data
 		return this.examServie.getExamInfo(examId)
 	}
+	async getExamSort(){
+		const {
+			date
+		} = this.ctx.data
+		return this.examServie.getExamSort(date)
+	}
 }
