@@ -197,22 +197,31 @@
 			},
 			confirmDelete(item) {
 				// this.$refs.udb.remove(item._id)
-				this.$request('exam/paper/deletePaper', {
-					paperId: item._id
-				}, {
-					showModal: false
-				}).then(res => {
-					uni.showToast({
-						title: '新增成功'
-					})
-					this.search()
-				}).catch(err => {
-					uni.showModal({
-						content: err.message || '请求服务失败',
-						showCancel: false
-					})
-				}).finally(() => {
-					uni.hideLoading()
+				uni.showModal({
+					title: '提示',
+					content: "确认删除试卷？",
+					showCancel: true,
+					success: (res) => {
+						if (res.cancel)
+							return
+						this.$request('exam/paper/deletePaper', {
+							paperId: item._id
+						}, {
+							showModal: false
+						}).then(res => {
+							uni.showToast({
+								title: '新增成功'
+							})
+							this.search()
+						}).catch(err => {
+							uni.showModal({
+								content: err.message || '请求服务失败',
+								showCancel: false
+							})
+						}).finally(() => {
+							uni.hideLoading()
+						})
+					}
 				})
 			},
 			confirmPublish(item) {

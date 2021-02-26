@@ -7,6 +7,13 @@
 			<view style="color: #dd524d">总分:{{getTotalScore}}</view>
 		</view>
 		<view class="uni-container">
+			<!-- 试卷图片 -->
+			<view class="hor-layout-center" style="margin-top: 50px;margin-bottom: 15px;">
+				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
+				<view style="font-weight: bold;margin-right: 15px;">试卷图片</view>
+				<image v-if="paperPic" :src="paperPic" mode="heightFix" style="height:100px;margin-right:10px;" @click="showPaperImage"></image>
+				<button style="margin-left: 0px;" type="primary" size="mini" @click="uploadImage">{{paperPic?'修改':'上传'}}</button>
+			</view>
 			<!-- 试卷题目 -->
 			<view class="hor-layout-center" style="margin-top: 50px;margin-bottom: 15px;">
 				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
@@ -24,8 +31,8 @@
 			<view class="hor-layout-center" style="margin-bottom: 15px;">
 				<view style="color: red;font-weight: bold;margin: 0px 3px;">*</view>
 				<view style="font-weight: bold;margin-right: 15px;">考试时间</view>
-				<el-date-picker :disabled="formDataFlag?true:false" v-model="selTime" type="datetimerange" range-separator="至" format="yyyy-MM-dd HH:mm" value-format="timestamp"
-				 start-placeholder="开始日期" end-placeholder="结束日期" align="left">
+				<el-date-picker :disabled="formDataFlag?true:false" v-model="selTime" type="datetimerange" range-separator="至"
+				 format="yyyy-MM-dd HH:mm" value-format="timestamp" start-placeholder="开始日期" end-placeholder="结束日期" align="left">
 				</el-date-picker>
 			</view>
 			<!--所有题目-->
@@ -136,102 +143,29 @@
 				</uni-forms>
 			</view>
 		</uni-popup>
+		<!-- 试卷图片 -->
+		<uni-popup ref="paperImg_popup" popupConWidth="60%">
+			<view class="popup-image" @click="closeImagePopup">
+				<h4 style="margin: 20px 0px;">试卷图片：</h4>
+				<image :src="paperPic" mode="aspectFit" style="width:100%;height:50vh;"></image>
+			</view>
+		</uni-popup>
 	</view>
 </template>
 
 <script>
-	import validator from '@/js_sdk/validator/question.js';
+	import addData from './add-data'
 	import UniIcons from "@/components/uni-icons/uni-icons";
-
+	import uploadFile from '@/js_sdk/ossutil/uploadFile.js'
 	const db = uniCloud.database();
 	const dbCmd = db.command;
-
-	function getValidator(fields) {
-		let reuslt = {}
-		for (let key in validator) {
-			if (fields.includes(key)) {
-				reuslt[key] = validator[key]
-			}
-		}
-		return reuslt
-	}
 
 	export default {
 		components: {
 			UniIcons
 		},
 		data() {
-			return {
-				questionDecs: [{
-						"text": "正确",
-						"value": '正确',
-						"decide": true
-					},
-					{
-						"text": "错误",
-						"value": '错误',
-						"decide": false
-					}
-				],
-				questionOpts: [{
-						"text": "A",
-						"value": 'A'
-					},
-					{
-						"text": "B",
-						"value": "B"
-					},
-					{
-						"text": "C",
-						"value": "C"
-					},
-					{
-						"text": "D",
-						"value": "D"
-					}
-				],
-				questionList: [],
-				questionType: 0,
-				questionChoose: {
-					"index": 0,
-					"title": "",
-					"options": [{
-							"text": "A",
-							"content": ''
-						},
-						{
-							"text": "B",
-							"content": ""
-						},
-						{
-							"text": "C",
-							"content": ""
-						},
-						{
-							"text": "D",
-							"content": ""
-						}
-					],
-					"answer": [],
-					"score": 1
-				},
-				questionDecide: {
-					"index": 0,
-					"title": "",
-					"decide": true,
-					"score": 1
-				},
-				rules: {
-					...getValidator(["title", "options", "answer", "score"])
-				},
-				selRoles: [],
-				paperTitle: '',
-				paperId: '',
-				questionId: '',
-				formDataFlag: '',
-				roles: [],
-				selTime:[]
-			}
+			return addData
 		},
 		computed: {
 			getDecideAns() {
@@ -421,11 +355,12 @@
 					let result = res.result.data[0]
 					this.questionList = result.question_list
 					this.paperTitle = result.title
+					this.paperPic = result.image
 					this.selRoles = result.user_role
-					let selTime=[]
+					let selTime = []
 					selTime.push(result.start_time)
 					selTime.push(result.end_time)
-					this.selTime=selTime
+					this.selTime = selTime
 				}).catch(err => {
 					alert(JSON.stringify(err))
 				})
@@ -449,6 +384,7 @@
 				}
 				let value = {
 					title: this.paperTitle,
+					image: this.paperPic,
 					user_role: this.selRoles,
 					start_time: this.selTime[0],
 					end_time: this.selTime[1]
@@ -488,6 +424,28 @@
 						showCancel: false
 					})
 				})
+			},
+			uploadImage() {
+				// todo 如果之前已经存在，需要先删除图片
+				uni.chooseImage({
+					count: 1
+				}).then(res => {
+					debugger
+					let path = res[1].tempFilePaths[0]
+					uploadFile(path, 'work', (res) => {
+						debugger
+						console.log(res)
+						this.paperPic = res
+					}, (err) => {
+						console.error(err)
+					})
+				})
+			},
+			showPaperImage() {
+				this.$refs['paperImg_popup'].open()
+			},
+			closeImagePopup() {
+				this.$refs['paperImg_popup'].close()
 			}
 		}
 	}
@@ -516,5 +474,11 @@
 		margin-top: 30px;
 		padding: 20px;
 		width: 90%;
+	}
+
+	.popup-image {
+		padding: 10px;
+		background: white;
+		text-align: center;
 	}
 </style>
